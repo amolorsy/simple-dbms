@@ -34,10 +34,6 @@ public class Record {
 	return true;
     }
 
-    public boolean isColumnExist(String columnName) {
-	return true;
-    }
-
     public void save(Table table) {
 
     }

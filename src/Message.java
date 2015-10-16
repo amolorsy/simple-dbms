@@ -2,8 +2,9 @@ public class Message {
     public static final int CREATE_TABLE_SUCCESS = 0;
     public static final int DROP_SUCCESS = 1;
     public static final int DROP_SUCCESS_ALL_TABLES = 2;
-    public static final int DUPLICATE_COLUMN_ERROR = 3;
-    public static final int DUPLICATE_PRIMARY_ERROR = 4;
+    
+    public static final int DUPLICATE_COLUMN_DEF_ERROR = 3;
+    public static final int DUPLICATE_PRIMARY_KEY_DEF_ERROR = 4;
     public static final int REFERENCE_TYPE_ERROR = 5;
     public static final int REFERENCE_NON_PRIMARY_KEY_ERROR = 6;
     public static final int REFERENCE_COLUMN_EXISTENCE_ERROR = 7;
@@ -25,10 +26,10 @@ public class Message {
 	case DROP_SUCCESS_ALL_TABLES:
 	    System.out.println("Every table is dropped");
 	    break;
-	case DUPLICATE_COLUMN_ERROR:
+	case DUPLICATE_COLUMN_DEF_ERROR:
 	    System.out.println("Create table has failed: column definition is duplicated");
 	    break;
-	case DUPLICATE_PRIMARY_ERROR:
+	case DUPLICATE_PRIMARY_KEY_DEF_ERROR:
 	    System.out.println("Create table has failed: primary key definition is duplicated");
 	    break;
 	case REFERENCE_TYPE_ERROR:
