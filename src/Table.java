@@ -12,6 +12,7 @@ public class Table implements Serializable {
 
     private String tableName;
     private Map<String, Column> tableColumnDictionary;
+    private Table referencingTable;
 
     private PrimaryKey primaryKey;
     private List<ForeignKey> foreignKeys;
@@ -46,6 +47,14 @@ public class Table implements Serializable {
     public Map<String, Column> getTableColumnDictionary() {
 	return tableColumnDictionary;
     }
+    
+    public void setReferencingTable(Table referencingTable) {
+	this.referencingTable = referencingTable;
+    }
+    
+    public Table getReferencingTable() {
+	return referencingTable;
+    }
 
     public PrimaryKey getPrimaryKey() {
 	return primaryKey;
@@ -78,8 +87,8 @@ public class Table implements Serializable {
 	}
     }
 
-    public void setForeignKey(ArrayList<String> columnNameList, String referencingTableName,
-	    ArrayList<String> referencingColumnNameList) throws ParseException {
+    public void setForeignKey(ArrayList<String> columnNameList, String referencedTableName,
+	    ArrayList<String> referencedColumnNameList) throws ParseException {
 	ForeignKey foreignKey = new ForeignKey();
 
 	for (String columnName : columnNameList) {
@@ -92,38 +101,39 @@ public class Table implements Serializable {
 	    foreignKey.addForeignKeyColumn(column);
 	}
 
-	if (!record.isTableExist(referencingTableName)) {
+	if (!record.isTableExist(referencedTableName)) {
 	    Message.print(Message.REFERENCE_TABLE_EXISTENCE_ERROR, null);
 	    throw new ParseException();
 	} else {
-	    Table referencingTable = record.getTableDictionary().get(referencingTableName);
-	    Map<String, Column> referencingTableColumnDictionary = referencingTable.getTableColumnDictionary();
+	    Table referencedTable = record.getTableDictionary().get(referencedTableName);
+	    Map<String, Column> referencedTableColumnDictionary = referencedTable.getTableColumnDictionary();
 
-	    for (String referencingColumnName : referencingColumnNameList) {
-		if (!referencingTableColumnDictionary.containsKey(referencingColumnName)) {
+	    for (String referencedColumnName : referencedColumnNameList) {
+		if (!referencedTableColumnDictionary.containsKey(referencedColumnName)) {
 		    Message.print(Message.REFERENCE_COLUMN_EXISTENCE_ERROR, null);
 		    throw new ParseException();
 		}
 
-		Column referencingColumn = referencingTableColumnDictionary.get(referencingColumnName);
+		Column referencedColumn = referencedTableColumnDictionary.get(referencedColumnName);
 
 		for (Column column : foreignKey.getForeignKeyColumns()) {
-		    if (column.getColumnType() != referencingColumn.getColumnType()) {
+		    if (column.getColumnType() != referencedColumn.getColumnType()) {
 			Message.print(Message.REFERENCE_TYPE_ERROR, null);
 			throw new ParseException();
 		    }
 		}
 
-		if (!referencingTable.getPrimaryKey().getPrimaryKeyColumns().contains(referencingColumn)) {
+		if (!referencedTable.getPrimaryKey().getPrimaryKeyColumns().contains(referencedColumn)) {
 		    Message.print(Message.REFERENCE_NON_PRIMARY_KEY_ERROR, null);
 		    throw new ParseException();
 		}
 
-		foreignKey.addReferencingColumn(referencingColumn);
+		foreignKey.addReferencedColumn(referencedColumn);
 	    }
 
 	    foreignKey.setForeignKeyingTable(this);
-	    foreignKey.setReferencingTable(referencingTable);
+	    foreignKey.setReferencedTable(referencedTable);
+	    referencedTable.setReferencingTable(this);
 	}
 
 	foreignKeys.add(foreignKey);

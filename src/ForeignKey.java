@@ -7,12 +7,12 @@ public class ForeignKey implements Serializable {
     
     private Table foreignKeyingTable;
     private List<Column> foreignKeyColumns;
-    private Table referencingTable;
-    private List<Column> referencingColumns;
+    private Table referencedTable;
+    private List<Column> referencedColumns;
 
     public ForeignKey() {
 	foreignKeyColumns = new ArrayList<Column>();
-	referencingColumns = new ArrayList<Column>();
+	referencedColumns = new ArrayList<Column>();
     }
 
     public void setForeignKeyingTable(Table foreignKeyingTable) {
@@ -31,19 +31,19 @@ public class ForeignKey implements Serializable {
 	return foreignKeyColumns;
     }
 
-    public void setReferencingTable(Table referencingTable) {
-	this.referencingTable = referencingTable;
+    public void setReferencedTable(Table referencedTable) {
+	this.referencedTable = referencedTable;
     }
 
-    public Table getReferencingTable() {
-	return referencingTable;
+    public Table getReferencedTable() {
+	return referencedTable;
     }
 
-    public void addReferencingColumn(Column referencingColumn) {
-	referencingColumns.add(referencingColumn);
+    public void addReferencedColumn(Column referencedColumn) {
+	referencedColumns.add(referencedColumn);
     }
 
-    public List<Column> getReferencingColumns() {
-	return referencingColumns;
+    public List<Column> getReferencedColumns() {
+	return referencedColumns;
     }
 }
