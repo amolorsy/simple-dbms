@@ -5,4 +5,6 @@ SimpleDBMSParserConstants.java
 SimpleDBMSParserTokenManager.java
 Token.java
 TokenMgrError.java
-/bin/
+
+bin/
+db/
