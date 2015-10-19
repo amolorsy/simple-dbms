@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.sleepycat.bind.EntryBinding;
@@ -68,7 +70,7 @@ public class Record {
 	    value = new DatabaseEntry();
 	    entryBinding.objectToEntry(table, value);
 	    database.put(null, key, value);
-	    
+
 	    tableDictionary.put(table.getTableName(), table);
 	} catch (UnsupportedEncodingException e) {
 	    e.printStackTrace();
@@ -100,7 +102,7 @@ public class Record {
 	    DatabaseEntry key = new DatabaseEntry(tableName.getBytes("UTF-8"));
 	    DatabaseEntry value = new DatabaseEntry();
 	    database.get(null, key, value, LockMode.DEFAULT);
-	    
+
 	    Table table = (Table) entryBinding.entryToObject(value);
 	    table = null;
 	    database.delete(null, value);
@@ -109,5 +111,35 @@ public class Record {
 	} catch (UnsupportedEncodingException e) {
 	    e.printStackTrace();
 	}
+    }
+
+    public void printDesc(ArrayList<String> tableNameList) throws ParseException {
+	ArrayList<Table> tables = new ArrayList<Table>();
+
+	for (String tableName : tableNameList) {
+	    Table table = load(tableName);
+
+	    if (table == null) {
+		Message.print(Message.NO_SUCH_TABLE, null);
+		throw new ParseException();
+	    }
+
+	    tables.add(table);
+	}
+
+	for (Table table : tables) {
+	    List<Column> tableColumns = table.getTableColumns();
+
+	    System.out.println("-------------------------------------------------");
+	    System.out.println("table_name [" + table.getTableName() + "]");
+	    System.out.println("column_name\t\t" + "type\t\t" + "null\t\t" + "key");
+
+	    for (Column column : tableColumns) {
+		System.out.println(column.getColumnName() + "\t\t" + column.getColumnType().toString() + "\t\t"
+			+ (column.canHaveNullValue() ? "Y\t\t" : "N\t\t") + column.getKeyType());
+	    }
+	}
+
+	System.out.println("-------------------------------------------------");
     }
 }

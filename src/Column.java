@@ -8,7 +8,12 @@ public class Column implements Serializable {
     private String columnName;
     private ColumnType columnType;
     
-    public Column() { }
+    private String keyType;
+    
+    public Column() { 
+	this.keyType = "";
+	canHaveNullValue = true;
+    }
     
     public void setColumnName(String columnName) {
 	this.columnName = columnName;
@@ -24,6 +29,14 @@ public class Column implements Serializable {
     
     public ColumnType getColumnType() {
 	return columnType;
+    }
+    
+    public void setKeyType(String keyType) {
+	this.keyType = keyType;
+    }
+    
+    public String getKeyType() {
+	return keyType;
     }
     
     public void guaranteeNotNull() {

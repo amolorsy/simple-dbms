@@ -12,6 +12,7 @@ public class Table implements Serializable {
 
     private String tableName;
     private Map<String, Column> tableColumnDictionary;
+    private List<Column> tableColumns;
     private Table referencingTable;
 
     private PrimaryKey primaryKey;
@@ -19,10 +20,11 @@ public class Table implements Serializable {
 
     public Table(Record record) {
 	this.record = record;
-
 	this.isSetPrimaryKeyDone = false;
 
 	tableColumnDictionary = new HashMap<String, Column>();
+	tableColumns = new ArrayList<Column>();
+	
 	primaryKey = new PrimaryKey();
 	foreignKeys = new ArrayList<ForeignKey>();
     }
@@ -42,10 +44,15 @@ public class Table implements Serializable {
 	}
 
 	tableColumnDictionary.put(column.getColumnName(), column);
+	tableColumns.add(column);
     }
 
     public Map<String, Column> getTableColumnDictionary() {
 	return tableColumnDictionary;
+    }
+    
+    public List<Column> getTableColumns() {
+	return tableColumns;
     }
     
     public void setReferencingTable(Table referencingTable) {
@@ -77,7 +84,8 @@ public class Table implements Serializable {
 		    Column column = tableColumnDictionary.get(columnName);
 
 		    if (!column.canHaveNullValue()) {
-			primaryKey.addPrimaryKeyColumns(column);
+			column.setKeyType("PRI");
+			primaryKey.addPrimaryKeyColumn(column);
 		    }
 		}
 	    }
@@ -98,6 +106,7 @@ public class Table implements Serializable {
 	    }
 
 	    Column column = tableColumnDictionary.get(columnName);
+	    column.setKeyType("FOR");
 	    foreignKey.addForeignKeyColumn(column);
 	}
 

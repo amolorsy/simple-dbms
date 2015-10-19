@@ -12,7 +12,7 @@ public class PrimaryKey implements Serializable {
 	primaryKeyColumns = new ArrayList<Column>();
     }
     
-    public void addPrimaryKeyColumns(Column column) {
+    public void addPrimaryKeyColumn(Column column) {
 	primaryKeyColumns.add(column);
     }
     
