@@ -68,6 +68,8 @@ public class Record {
 	    value = new DatabaseEntry();
 	    entryBinding.objectToEntry(table, value);
 	    database.put(null, key, value);
+	    
+	    tableDictionary.put(table.getTableName(), table);
 	} catch (UnsupportedEncodingException e) {
 	    e.printStackTrace();
 	}
@@ -88,10 +90,24 @@ public class Record {
     }
 
     public void dropAllTables() {
-
+	for (String tableName : tableDictionary.keySet()) {
+	    dropTable(tableName);
+	}
     }
 
-    public void dropTable(String table) {
+    public void dropTable(String tableName) {
+	try {
+	    DatabaseEntry key = new DatabaseEntry(tableName.getBytes("UTF-8"));
+	    DatabaseEntry value = new DatabaseEntry();
+	    database.get(null, key, value, LockMode.DEFAULT);
+	    
+	    Table table = (Table) entryBinding.entryToObject(value);
+	    table = null;
+	    database.delete(null, value);
 
+	    tableDictionary.remove(tableName);
+	} catch (UnsupportedEncodingException e) {
+	    e.printStackTrace();
+	}
     }
 }
