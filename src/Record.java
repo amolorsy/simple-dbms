@@ -94,48 +94,4 @@ public class Record {
     public void dropTable(String table) {
 
     }
-
-    /*
-     * Map<String, Column> tableColumnDictionary =
-     * table.getTableColumnDictionary(); PrimaryKey primaryKey =
-     * table.getPrimaryKey(); List<ForeignKey> foreignKeys =
-     * table.getForeignKeys();
-     * 
-     * // Table name key = new DatabaseEntry("table_name".getBytes("UTF-8"));
-     * value = new DatabaseEntry(table.getTableName().getBytes("UTF-8"));
-     * cursor.put(key, value);
-     * 
-     * // Table columns for (String columnName : tableColumnDictionary.keySet())
-     * { key = new DatabaseEntry(columnName.getBytes("UTF-8")); value = new
-     * DatabaseEntry(
-     * tableColumnDictionary.get(columnName).getColumnType().toString().getBytes
-     * ("UTF-8")); cursor.put(key, value); }
-     * 
-     * // Primary key StringBuilder stringBuilder = new StringBuilder();
-     * List<Column> primaryKeyColumns = primaryKey.getPrimaryKeyColumns(); for
-     * (int i = 0; i < primaryKeyColumns.size(); i++) { if (i == 0)
-     * stringBuilder.append(primaryKeyColumns.get(i).getColumnName()); else
-     * stringBuilder.append(", "
-     * ).append(primaryKeyColumns.get(i).getColumnName()); } key = new
-     * DatabaseEntry("primary_key".getBytes("UTF-8")); value = new
-     * DatabaseEntry(stringBuilder.toString().getBytes("UTF-8"));
-     * cursor.put(key, value);
-     * 
-     * // Foreign keys int count = 1; Iterator<ForeignKey> iterator =
-     * foreignKeys.iterator(); while (iterator.hasNext()) { stringBuilder = new
-     * StringBuilder();
-     * 
-     * ForeignKey foreignKey = iterator.next(); List<Column> foreignKeyColumns =
-     * foreignKey.getForeignKeyColumns(); for (int i = 0; i <
-     * foreignKeyColumns.size(); i++) { if (i == 0)
-     * stringBuilder.append(foreignKeyColumns.get(i).getColumnName()); else
-     * stringBuilder.append(", "
-     * ).append(foreignKeyColumns.get(i).getColumnName()); }
-     * 
-     * key = new DatabaseEntry(("foreign_key" + count++).getBytes("UTF-8"));
-     * value = new DatabaseEntry(stringBuilder.toString().getBytes("UTF-8"));
-     * cursor.put(key, value);
-     * 
-     * tableDictionary.put(table.getTableName(), table); }
-     */
 }

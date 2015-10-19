@@ -128,5 +128,4 @@ public class Table implements Serializable {
 
 	foreignKeys.add(foreignKey);
     }
-
 }
