@@ -45,12 +45,12 @@ public class Record {
     }
 
     public void quit() {
-	if (environment != null)
-	    environment.close();
 	if (database != null)
 	    database.close();
 	if (classDatabase != null)
 	    classDatabase.close();
+	if (environment != null)
+	    environment.close();
     }
 
     public boolean isTableExist(String tableName) {
