@@ -28,7 +28,12 @@ public class Message {
     public static final int PRINT_DELETE = 19;
     public static final int PRINT_SELECT = 20;
     
+    /* For create table, desc command, schemaErrors is used to store errors of execution */
     private ArrayList<Unit> schemaErrors;
+    
+    /* For create table command, commandResults is used to store success execution results
+     * For drop table command, commandResults is used to store dropping execution results of tables
+     */
     private ArrayList<Unit> commandResults;
     
     private Message() {
@@ -140,6 +145,8 @@ public class Message {
 	}
     }
     
+    // Include message type, word
+    // Word is used in printing message
     public static class Unit {
 	private int messageType;
 	private String word;

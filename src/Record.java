@@ -29,6 +29,7 @@ public class Record {
 	tableDictionary = new HashMap<String, Table>();
     }
 
+    /* Berkeley DB setup */
     public void setup() {
 	EnvironmentConfig envConfig = new EnvironmentConfig();
 	envConfig.setAllowCreate(true);
@@ -40,13 +41,14 @@ public class Record {
 	database = environment.openDatabase(null, "db", dbConfig);
     }
 
+    /* Berkeley DB quit */
     public void quit() {
 	if (database != null)
 	    database.close();
 	if (environment != null)
 	    environment.close();
     }
-
+ 
     public boolean isTableExist(String tableName) {
 	return tableDictionary.containsKey(tableName);
     }
@@ -55,6 +57,7 @@ public class Record {
 	return tableDictionary;
     }
 
+    // Make object to byte array
     public byte[] objectToByteArray(Object object) {
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	
@@ -70,6 +73,7 @@ public class Record {
 	return null;
     }
 
+    // Make byte array to object
     public Object byteArrayToObject(byte[] byteArray) {
 	ByteArrayInputStream bais = new ByteArrayInputStream(byteArray);
 	
@@ -86,6 +90,7 @@ public class Record {
 	return null;
     }
 
+    // Save table schema on Berkeley DB
     public void save(Table table) {
 	DatabaseEntry key;
 	DatabaseEntry value;
@@ -101,6 +106,7 @@ public class Record {
 	}
     }
 
+    // Load table schema from Berkeley DB
     public Table load(String tableName) {
 	Table table = null;
 	
@@ -125,6 +131,7 @@ public class Record {
 	}
     }
 
+    /* drop table schema from Berkeley DB */
     public void dropTable(String tableName) {
 	try {
 	    DatabaseEntry key = new DatabaseEntry(tableName.getBytes("UTF-8"));
@@ -140,6 +147,7 @@ public class Record {
 	ArrayList<Table> tables = new ArrayList<Table>();
 	
 	if (tableNameList.size() == 1 && tableNameList.get(0).equals("*")) {
+	    /* desc *; */
 	    Set<String> tableNameSet = tableDictionary.keySet();
 	    Iterator<String> iterator = tableNameSet.iterator();
 	    
@@ -152,6 +160,7 @@ public class Record {
 	    }
 	}
 	else {
+	    /* desc a, b, c; */
 	    for (String tableName : tableNameList) {
 		Table table = load(tableName);
 

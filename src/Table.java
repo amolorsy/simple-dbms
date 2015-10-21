@@ -39,10 +39,12 @@ public class Table implements Serializable {
 
     public void addColumn(Column column) {
 	if (tableColumnDictionary.containsKey(column.getColumnName())) {
+	    // DUPLICATE_COMLUMN_DEF_ERROR
 	    Message.getInstance().addSchemaError(new Message.Unit(Message.DUPLICATE_COLUMN_DEF_ERROR, null));
 	    return;
 	}
 
+	// Insert column
 	tableColumnDictionary.put(column.getColumnName(), column);
 	tableColumns.add(column);
     }
@@ -72,10 +74,13 @@ public class Table implements Serializable {
     }
 
     public void setPrimaryKey(ArrayList<String> columnNameList) {
+	// Check if primary key definition done
 	if (isSetPrimaryKeyDone) {
 	    Message.getInstance().addSchemaError(new Message.Unit(Message.DUPLICATE_PRIMARY_KEY_DEF_ERROR, null));
 	    return;
 	} else {
+	    /* Start primary key definition */
+	    
 	    for (String columnName : columnNameList) {
 		if (!tableColumnDictionary.containsKey(columnName)) {
 		    Message.getInstance().addSchemaError(new Message.Unit(Message.NON_EXISTING_COLUMN_DEF_ERROR, columnName));
@@ -88,7 +93,9 @@ public class Table implements Serializable {
 		else {
 		    Column column = tableColumnDictionary.get(columnName);
 
+		    /* Set key type of column of primary key */
 		    if (!column.canHaveNullValue()) {
+			// The column of primary key must not be null
 			if (column.getColumnType().equals("FOR"))
 			    column.setKeyType("PRI/FOR");
 			else
@@ -118,6 +125,8 @@ public class Table implements Serializable {
 	    }
 
 	    Column column = tableColumnDictionary.get(columnName);
+	    
+	    /* Set key type of column of foreign key */
 	    if (column.getKeyType().equals("PRI"))
 		column.setKeyType("PRI/FOR");
 	    else
@@ -125,6 +134,7 @@ public class Table implements Serializable {
 	    foreignKey.addForeignKeyColumn(column);
 	}
 
+	// Check if referenced table exists on Berkeley DB
 	if (!record.isTableExist(referencedTableName)) {
 	    Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_TABLE_EXISTENCE_ERROR, null));
 	    return;
