@@ -80,11 +80,19 @@ public class Table implements Serializable {
 		if (!tableColumnDictionary.containsKey(columnName)) {
 		    Message.getInstance().addSchemaError(new Message.Unit(Message.NON_EXISTING_COLUMN_DEF_ERROR, columnName));
 		    return;
-		} else {
+		}
+		else if (primaryKey.getPrimaryKeyColumnDictionary().containsKey(columnName)) {
+		    Message.getInstance().addSchemaError(new Message.Unit(Message.DUPLICATE_COLUMN_DEF_ERROR, null));
+		    return;
+		}
+		else {
 		    Column column = tableColumnDictionary.get(columnName);
 
 		    if (!column.canHaveNullValue()) {
-			column.setKeyType("PRI");
+			if (column.getColumnType().equals("FOR"))
+			    column.setKeyType("PRI/FOR");
+			else
+			    column.setKeyType("PRI");
 			primaryKey.addPrimaryKeyColumn(column);
 		    }
 		}
@@ -104,9 +112,16 @@ public class Table implements Serializable {
 		Message.getInstance().addSchemaError(new Message.Unit(Message.NON_EXISTING_COLUMN_DEF_ERROR, columnName));
 		return;
 	    }
+	    else if (foreignKey.getForeignKeyColumnDictionary().containsKey(columnName)) {
+		Message.getInstance().addSchemaError(new Message.Unit(Message.DUPLICATE_COLUMN_DEF_ERROR, null));
+		return;
+	    }
 
 	    Column column = tableColumnDictionary.get(columnName);
-	    column.setKeyType("FOR");
+	    if (column.getKeyType().equals("PRI"))
+		column.setKeyType("PRI/FOR");
+	    else
+		column.setKeyType("FOR");
 	    foreignKey.addForeignKeyColumn(column);
 	}
 
@@ -122,11 +137,15 @@ public class Table implements Serializable {
 		    Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_COLUMN_EXISTENCE_ERROR, null));
 		    return;
 		}
+		else if (foreignKey.getReferencedColumnDictionary().containsKey(referencedColumnName)) {
+		    Message.getInstance().addSchemaError(new Message.Unit(Message.DUPLICATE_COLUMN_DEF_ERROR, null));
+		    return;
+		}
 
 		Column referencedColumn = referencedTableColumnDictionary.get(referencedColumnName);
 
 		for (Column column : foreignKey.getForeignKeyColumns()) {
-		    if (column.getColumnType() != referencedColumn.getColumnType()) {
+		    if (!column.getColumnType().toString().equals(referencedColumn.getColumnType().toString())) {
 			Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_TYPE_ERROR, null));
 			return;
 		    }

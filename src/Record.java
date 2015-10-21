@@ -7,8 +7,10 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
@@ -136,16 +138,30 @@ public class Record {
 
     public void printDesc(ArrayList<String> tableNameList) {
 	ArrayList<Table> tables = new ArrayList<Table>();
-
-	for (String tableName : tableNameList) {
-	    Table table = load(tableName);
-
-	    if (table == null) {
-		Message.getInstance().addSchemaError(new Message.Unit(Message.NO_SUCH_TABLE, null));
-		return;
+	
+	if (tableNameList.size() == 1 && tableNameList.get(0).equals("*")) {
+	    Set<String> tableNameSet = tableDictionary.keySet();
+	    Iterator<String> iterator = tableNameSet.iterator();
+	    
+	    while (iterator.hasNext()) {
+		String tableName = iterator.next();
+		Table table = load(tableName);
+		
+		if (table != null)
+		    tables.add(table);
 	    }
+	}
+	else {
+	    for (String tableName : tableNameList) {
+		Table table = load(tableName);
 
-	    tables.add(table);
+		if (table == null) {
+		    Message.getInstance().addSchemaError(new Message.Unit(Message.NO_SUCH_TABLE, null));
+		    return;
+		}
+
+		tables.add(table);
+	    }
 	}
 
 	for (Table table : tables) {
@@ -153,14 +169,15 @@ public class Record {
 
 	    System.out.println("-------------------------------------------------");
 	    System.out.println("table_name [" + table.getTableName() + "]");
-	    System.out.println("column_name\t\t" + "type\t\t" + "null\t\t" + "key");
+	    System.out.println("column_name\t" + "type\t" + "null\t" + "key");
 
 	    for (Column column : tableColumns) {
-		System.out.println(column.getColumnName() + "\t\t" + column.getColumnType().toString() + "\t\t"
-			+ (column.canHaveNullValue() ? "Y\t\t" : "N\t\t") + column.getKeyType());
+		System.out.println(column.getColumnName() + "\t" + column.getColumnType().toString() + "\t"
+			+ (column.canHaveNullValue() ? "Y\t" : "N\t") + column.getKeyType());
 	    }
 	}
 
-	System.out.println("-------------------------------------------------");
+	if (tables.size() != 0)
+	    System.out.println("-------------------------------------------------");
     }
 }
