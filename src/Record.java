@@ -1,13 +1,15 @@
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sleepycat.bind.EntryBinding;
-import com.sleepycat.bind.serial.SerialBinding;
-import com.sleepycat.bind.serial.StoredClassCatalog;
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
 import com.sleepycat.je.DatabaseEntry;
@@ -18,8 +20,6 @@ import com.sleepycat.je.LockMode;
 public class Record {
     private Environment environment;
     private Database database;
-    private Database classDatabase;
-    private EntryBinding<Table> entryBinding;
 
     private Map<String, Table> tableDictionary;
 
@@ -36,19 +36,11 @@ public class Record {
 	dbConfig.setAllowCreate(true);
 	dbConfig.setSortedDuplicates(true);
 	database = environment.openDatabase(null, "db", dbConfig);
-
-	dbConfig.setSortedDuplicates(false);
-	classDatabase = environment.openDatabase(null, "class_db", dbConfig);
-
-	StoredClassCatalog storedClassCatalog = new StoredClassCatalog(classDatabase);
-	entryBinding = new SerialBinding<Table>(storedClassCatalog, Table.class);
     }
 
     public void quit() {
 	if (database != null)
 	    database.close();
-	if (classDatabase != null)
-	    classDatabase.close();
 	if (environment != null)
 	    environment.close();
     }
@@ -61,14 +53,44 @@ public class Record {
 	return tableDictionary;
     }
 
+    public byte[] objectToByteArray(Object object) {
+	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	
+	try {
+	    ObjectOutputStream oos = new ObjectOutputStream(baos);
+	    oos.writeObject(object);
+	    
+	    return baos.toByteArray();
+	} catch (IOException e) {
+	    e.printStackTrace();
+	}
+	
+	return null;
+    }
+
+    public Object byteArrayToObject(byte[] byteArray) {
+	ByteArrayInputStream bais = new ByteArrayInputStream(byteArray);
+	
+	try {
+	    ObjectInputStream ois = new ObjectInputStream(bais);
+	    
+	    return ois.readObject();
+	} catch (IOException e) {
+	    e.printStackTrace();
+	} catch (ClassNotFoundException e) {
+	    e.printStackTrace();
+	}
+	
+	return null;
+    }
+
     public void save(Table table) {
 	DatabaseEntry key;
 	DatabaseEntry value;
 
 	try {
 	    key = new DatabaseEntry(table.getTableName().getBytes("UTF-8"));
-	    value = new DatabaseEntry();
-	    entryBinding.objectToEntry(table, value);
+	    value = new DatabaseEntry(objectToByteArray(table));
 	    database.put(null, key, value);
 
 	    tableDictionary.put(table.getTableName(), table);
@@ -78,17 +100,21 @@ public class Record {
     }
 
     public Table load(String tableName) {
+	Table table = null;
+	
 	try {
 	    DatabaseEntry key = new DatabaseEntry(tableName.getBytes("UTF-8"));
 	    DatabaseEntry value = new DatabaseEntry();
 	    database.get(null, key, value, LockMode.DEFAULT);
-
-	    return ((Table) entryBinding.entryToObject(value));
+	    
+	    if (value.getData() != null) {
+		table = (Table) byteArrayToObject(value.getData());
+	    }
 	} catch (UnsupportedEncodingException e) {
 	    e.printStackTrace();
 	}
 
-	return null;
+	return table == null ? null : table;
     }
 
     public void dropAllTables() {
@@ -100,12 +126,7 @@ public class Record {
     public void dropTable(String tableName) {
 	try {
 	    DatabaseEntry key = new DatabaseEntry(tableName.getBytes("UTF-8"));
-	    DatabaseEntry value = new DatabaseEntry();
-	    database.get(null, key, value, LockMode.DEFAULT);
-
-	    Table table = (Table) entryBinding.entryToObject(value);
-	    table = null;
-	    database.delete(null, value);
+	    database.delete(null, key);
 
 	    tableDictionary.remove(tableName);
 	} catch (UnsupportedEncodingException e) {
@@ -113,15 +134,15 @@ public class Record {
 	}
     }
 
-    public void printDesc(ArrayList<String> tableNameList) throws ParseException {
+    public void printDesc(ArrayList<String> tableNameList) {
 	ArrayList<Table> tables = new ArrayList<Table>();
 
 	for (String tableName : tableNameList) {
 	    Table table = load(tableName);
 
 	    if (table == null) {
-		Message.print(Message.NO_SUCH_TABLE, null);
-		throw new ParseException();
+		Message.getInstance().addSchemaError(new Message.Unit(Message.NO_SUCH_TABLE, null));
+		return;
 	    }
 
 	    tables.add(table);

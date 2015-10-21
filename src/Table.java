@@ -37,10 +37,10 @@ public class Table implements Serializable {
 	return tableName;
     }
 
-    public void addColumn(Column column) throws ParseException {
+    public void addColumn(Column column) {
 	if (tableColumnDictionary.containsKey(column.getColumnName())) {
-	    Message.print(Message.DUPLICATE_COLUMN_DEF_ERROR, null);
-	    throw new ParseException();
+	    Message.getInstance().addSchemaError(new Message.Unit(Message.DUPLICATE_COLUMN_DEF_ERROR, null));
+	    return;
 	}
 
 	tableColumnDictionary.put(column.getColumnName(), column);
@@ -71,15 +71,15 @@ public class Table implements Serializable {
 	return foreignKeys;
     }
 
-    public void setPrimaryKey(ArrayList<String> columnNameList) throws ParseException {
+    public void setPrimaryKey(ArrayList<String> columnNameList) {
 	if (isSetPrimaryKeyDone) {
-	    Message.print(Message.DUPLICATE_PRIMARY_KEY_DEF_ERROR, null);
-	    throw new ParseException();
+	    Message.getInstance().addSchemaError(new Message.Unit(Message.DUPLICATE_PRIMARY_KEY_DEF_ERROR, null));
+	    return;
 	} else {
 	    for (String columnName : columnNameList) {
 		if (!tableColumnDictionary.containsKey(columnName)) {
-		    Message.print(Message.NON_EXISTING_COLUMN_DEF_ERROR, columnName);
-		    throw new ParseException();
+		    Message.getInstance().addSchemaError(new Message.Unit(Message.NON_EXISTING_COLUMN_DEF_ERROR, columnName));
+		    return;
 		} else {
 		    Column column = tableColumnDictionary.get(columnName);
 
@@ -96,13 +96,13 @@ public class Table implements Serializable {
     }
 
     public void setForeignKey(ArrayList<String> columnNameList, String referencedTableName,
-	    ArrayList<String> referencedColumnNameList) throws ParseException {
+	    ArrayList<String> referencedColumnNameList) {
 	ForeignKey foreignKey = new ForeignKey();
 
 	for (String columnName : columnNameList) {
 	    if (!tableColumnDictionary.containsKey(columnName)) {
-		Message.print(Message.NON_EXISTING_COLUMN_DEF_ERROR, columnName);
-		throw new ParseException();
+		Message.getInstance().addSchemaError(new Message.Unit(Message.NON_EXISTING_COLUMN_DEF_ERROR, columnName));
+		return;
 	    }
 
 	    Column column = tableColumnDictionary.get(columnName);
@@ -111,30 +111,30 @@ public class Table implements Serializable {
 	}
 
 	if (!record.isTableExist(referencedTableName)) {
-	    Message.print(Message.REFERENCE_TABLE_EXISTENCE_ERROR, null);
-	    throw new ParseException();
+	    Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_TABLE_EXISTENCE_ERROR, null));
+	    return;
 	} else {
 	    Table referencedTable = record.getTableDictionary().get(referencedTableName);
 	    Map<String, Column> referencedTableColumnDictionary = referencedTable.getTableColumnDictionary();
 
 	    for (String referencedColumnName : referencedColumnNameList) {
 		if (!referencedTableColumnDictionary.containsKey(referencedColumnName)) {
-		    Message.print(Message.REFERENCE_COLUMN_EXISTENCE_ERROR, null);
-		    throw new ParseException();
+		    Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_COLUMN_EXISTENCE_ERROR, null));
+		    return;
 		}
 
 		Column referencedColumn = referencedTableColumnDictionary.get(referencedColumnName);
 
 		for (Column column : foreignKey.getForeignKeyColumns()) {
 		    if (column.getColumnType() != referencedColumn.getColumnType()) {
-			Message.print(Message.REFERENCE_TYPE_ERROR, null);
-			throw new ParseException();
+			Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_TYPE_ERROR, null));
+			return;
 		    }
 		}
 
 		if (!referencedTable.getPrimaryKey().getPrimaryKeyColumns().contains(referencedColumn)) {
-		    Message.print(Message.REFERENCE_NON_PRIMARY_KEY_ERROR, null);
-		    throw new ParseException();
+		    Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_NON_PRIMARY_KEY_ERROR, null));
+		    return;
 		}
 
 		foreignKey.addReferencedColumn(referencedColumn);

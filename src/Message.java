@@ -1,4 +1,8 @@
+import java.util.ArrayList;
+
 public class Message {
+    private static Message instance;
+    
     public static final int PRINT_SYNTAX_ERROR = -1;
     
     public static final int CREATE_TABLE_SUCCESS = 0;
@@ -23,6 +27,48 @@ public class Message {
     public static final int PRINT_INSERT = 18;
     public static final int PRINT_DELETE = 19;
     public static final int PRINT_SELECT = 20;
+    
+    private ArrayList<Unit> schemaErrors;
+    private ArrayList<Unit> commandResults;
+    
+    private Message() {
+	schemaErrors = new ArrayList<Unit>();
+    }
+    
+    public static Message getInstance() {
+	if (instance == null)
+	    instance = new Message();
+	
+	return instance;
+    }
+    
+    public void addSchemaError(Unit error) {
+	schemaErrors.add(error);
+    }
+    
+    public boolean isSchemaErrorExist() {
+	return schemaErrors.size() == 0 ? false : true;
+    }
+    
+    public ArrayList<Unit> getSchemaErrors() {
+	return schemaErrors;
+    }
+    
+    public void resetSchemaErrors() {
+	schemaErrors = new ArrayList<Unit>();
+    }
+    
+    public void addCommandResult(Unit result) {
+	commandResults.add(result);
+    }
+    
+    public ArrayList<Unit> getCommandResults() {
+	return commandResults;
+    }
+    
+    public void resetCommandResults() {
+	commandResults = new ArrayList<Unit>();
+    }
     
     public static void print(int type, String word) {
 	System.out.print("DB_2013-11379> ");
@@ -91,6 +137,24 @@ public class Message {
 	case PRINT_SELECT:
 	    System.out.println("\'SELECT\' requested");
 	    break;
+	}
+    }
+    
+    public static class Unit {
+	private int messageType;
+	private String word;
+
+	public Unit(int messageType, String word) {
+	    this.messageType = messageType;
+	    this.word = word;
+	}
+
+	public int getMessageType() {
+	    return messageType;
+	}
+
+	public String getWord() {
+	    return word;
 	}
     }
 }
