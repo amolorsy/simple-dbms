@@ -19,13 +19,15 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.LockMode;
 
-public class Record {
+import column.Column;
+
+public class RecordManager {
     private Environment environment;
     private Database database;
 
     private Map<String, Table> tableDictionary;
 
-    public Record() {
+    public RecordManager() {
 	tableDictionary = new HashMap<String, Table>();
     }
 

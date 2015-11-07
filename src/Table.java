@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import column.Column;
+
 public class Table implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    transient private Record record;
+    transient private RecordManager recordManager;
     transient private boolean isSetPrimaryKeyDone;
 
     private String tableName;
@@ -17,9 +19,11 @@ public class Table implements Serializable {
 
     private PrimaryKey primaryKey;
     private List<ForeignKey> foreignKeys;
+    
+    private List<Tuple> tuples;
 
-    public Table(Record record) {
-	this.record = record;
+    public Table(RecordManager recordManager) {
+	this.recordManager = recordManager;
 	this.isSetPrimaryKeyDone = false;
 
 	tableColumnDictionary = new HashMap<String, Column>();
@@ -27,6 +31,8 @@ public class Table implements Serializable {
 	
 	primaryKey = new PrimaryKey();
 	foreignKeys = new ArrayList<ForeignKey>();
+	
+	tuples = new ArrayList<Tuple>();
     }
 
     public void setTableName(String tableName) {
@@ -55,6 +61,10 @@ public class Table implements Serializable {
     
     public List<Column> getTableColumns() {
 	return tableColumns;
+    }
+    
+    public Column getTableColumn(String columnName) {
+	return tableColumnDictionary.get(columnName);
     }
     
     public void setReferencingTable(Table referencingTable) {
@@ -135,11 +145,11 @@ public class Table implements Serializable {
 	}
 
 	// Check if referenced table exists on Berkeley DB
-	if (!record.isTableExist(referencedTableName)) {
+	if (!recordManager.isTableExist(referencedTableName)) {
 	    Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_TABLE_EXISTENCE_ERROR, null));
 	    return;
 	} else {
-	    Table referencedTable = record.getTableDictionary().get(referencedTableName);
+	    Table referencedTable = recordManager.getTableDictionary().get(referencedTableName);
 	    Map<String, Column> referencedTableColumnDictionary = referencedTable.getTableColumnDictionary();
 
 	    for (String referencedColumnName : referencedColumnNameList) {
@@ -175,5 +185,13 @@ public class Table implements Serializable {
 	}
 
 	foreignKeys.add(foreignKey);
+    }
+    
+    public void addTuple(Tuple tuple) {
+	tuples.add(tuple);
+    }
+    
+    public List<Tuple> getTuples() {
+	return tuples;
     }
 }

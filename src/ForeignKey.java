@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import column.Column;
+
 public class ForeignKey implements Serializable {
     private static final long serialVersionUID = 1L;
     
