@@ -8,25 +8,40 @@ public class Message {
     public static final int CREATE_TABLE_SUCCESS = 0;
     public static final int DROP_SUCCESS = 1;
     public static final int DROP_SUCCESS_ALL_TABLES = 2;
+    public static final int INSERT_RESULT = 3;
+    public static final int DELETE_RESULT = 4;
     
-    public static final int DUPLICATE_COLUMN_DEF_ERROR = 3;
-    public static final int DUPLICATE_PRIMARY_KEY_DEF_ERROR = 4;
-    public static final int REFERENCE_TYPE_ERROR = 5;
-    public static final int REFERENCE_NON_PRIMARY_KEY_ERROR = 6;
-    public static final int REFERENCE_COLUMN_EXISTENCE_ERROR = 7;
-    public static final int REFERENCE_TABLE_EXISTENCE_ERROR = 8;
-    public static final int NON_EXISTING_COLUMN_DEF_ERROR = 9;
-    public static final int TABLE_EXISTENCE_ERROR = 10;
-    public static final int DROP_REFERENCED_TABLE_ERROR = 11;
-    public static final int NO_SUCH_TABLE = 12;
-    public static final int CHAR_LENGTH_ERROR = 13;
-    public static final int PRINT_CREATE_TABLE = 14;
-    public static final int PRINT_DROP_TABLE = 15;
-    public static final int PRINT_DESC = 16;
-    public static final int PRINT_SHOW_TABLES = 17;
-    public static final int PRINT_INSERT = 18;
-    public static final int PRINT_DELETE = 19;
-    public static final int PRINT_SELECT = 20;
+    public static final int DUPLICATE_COLUMN_DEF_ERROR = 5;
+    public static final int DUPLICATE_PRIMARY_KEY_DEF_ERROR = 6;
+    public static final int REFERENCE_TYPE_ERROR = 7;
+    public static final int REFERENCE_NON_PRIMARY_KEY_ERROR = 8;
+    public static final int REFERENCE_COLUMN_EXISTENCE_ERROR = 9;
+    public static final int REFERENCE_TABLE_EXISTENCE_ERROR = 10;
+    public static final int NON_EXISTING_COLUMN_DEF_ERROR = 11;
+    public static final int TABLE_EXISTENCE_ERROR = 12;
+    public static final int DROP_REFERENCED_TABLE_ERROR = 13;
+    public static final int NO_SUCH_TABLE = 14;
+    public static final int CHAR_LENGTH_ERROR = 15;
+    public static final int INSERT_TYPE_MISMATCH_ERROR = 16;
+    public static final int INSERT_COLUMN_NON_NULLABLE_ERROR = 17;
+    public static final int INSERT_COLUMN_EXISTENCE_ERROR = 18;
+    public static final int INSERT_DUPLICATE_PRIMARY_KEY_ERROR = 19;
+    public static final int INSERT_DUPLICATE_REFERENTIAL_INTEGRITY_ERROR = 20;
+    public static final int DELETE_REFERENTIAL_INTEGRITY_PASSED = 21;
+    public static final int WHERE_IN_COMPARABLE_ERROR = 22;
+    public static final int WHERE_TABLE_NOT_SPECIFIED = 23;
+    public static final int WHERE_COLUMN_NOT_EXIST = 24;
+    public static final int WHERE_AMBIGUOUS_REFERENCE = 25;
+    public static final int SELECT_TABLE_EXISTENCE_ERROR = 26;
+    public static final int SELECT_COLUMN_RESOLVE_ERROR = 27;
+    
+    public static final int PRINT_CREATE_TABLE = 28;
+    public static final int PRINT_DROP_TABLE = 29;
+    public static final int PRINT_DESC = 30;
+    public static final int PRINT_SHOW_TABLES = 31;
+    public static final int PRINT_INSERT = 32;
+    public static final int PRINT_DELETE = 33;
+    public static final int PRINT_SELECT = 34;
     
     /* For create table, desc command, schemaErrors is used to store errors of execution */
     private ArrayList<Unit> schemaErrors;
@@ -91,6 +106,12 @@ public class Message {
 	case DROP_SUCCESS_ALL_TABLES:
 	    System.out.println("Every table is dropped");
 	    break;
+	case INSERT_RESULT:
+	    System.out.println("The row is inserted");
+	    break;
+	case DELETE_RESULT:
+	    System.out.println(word + " row(s) are deleted");
+	    break;
 	case DUPLICATE_COLUMN_DEF_ERROR:
 	    System.out.println("Create table has failed: column definition is duplicated");
 	    break;
@@ -124,6 +145,42 @@ public class Message {
 	case CHAR_LENGTH_ERROR:
 	    System.out.println("Char length should be > 0");
 	    break;
+	case INSERT_TYPE_MISMATCH_ERROR:
+	    System.out.println("Insertion has failed: Types are not matched");
+	    break;
+	case INSERT_COLUMN_NON_NULLABLE_ERROR:
+	    System.out.println("Insertion has failed: '" + word + "' is not nullable");
+	    break;
+	case INSERT_COLUMN_EXISTENCE_ERROR:
+	    System.out.println("Insertion has failed: '" + word + "' does not exist");
+	    break;
+	case INSERT_DUPLICATE_PRIMARY_KEY_ERROR:
+	    System.out.println("Insertion has failed: Primary key duplication");
+	    break;
+	case INSERT_DUPLICATE_REFERENTIAL_INTEGRITY_ERROR:
+	    System.out.println("Insertion has failed: Referential integrity violation");
+	    break;
+	case DELETE_REFERENTIAL_INTEGRITY_PASSED:
+	    System.out.println(word + " row(s) are not deleted due to referential integrity");
+	    break;
+	case WHERE_IN_COMPARABLE_ERROR:
+	    System.out.println("Where clause try to compare incomparable values");
+	    break;
+	case WHERE_TABLE_NOT_SPECIFIED:
+	    System.out.println("Where clause try to reference tables which are not specified");
+	    break;
+	case WHERE_COLUMN_NOT_EXIST:
+	    System.out.println("Where clause try to reference non existing column");
+	    break;
+	case WHERE_AMBIGUOUS_REFERENCE:
+	    System.out.println("Where clause contains ambiguous reference");
+	    break;
+	case SELECT_TABLE_EXISTENCE_ERROR:
+	    System.out.println("Selection has failed: '" + word + "' does not exist");
+	    break;
+	case SELECT_COLUMN_RESOLVE_ERROR:
+	    System.out.println("Selection has failed: fail to resolve '" + word + "'");
+	    break;
 	case PRINT_CREATE_TABLE:
 	    break;
 	case PRINT_DROP_TABLE:
@@ -134,13 +191,10 @@ public class Message {
 	    System.out.println("\'SHOW TABLES\' requested");
 	    break;
 	case PRINT_INSERT:
-	    System.out.println("\'INSERT\' requested");
 	    break;
 	case PRINT_DELETE:
-	    System.out.println("\'DELETE\' requested");
 	    break;
 	case PRINT_SELECT:
-	    System.out.println("\'SELECT\' requested");
 	    break;
 	}
     }
