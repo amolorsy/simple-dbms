@@ -16,6 +16,16 @@ public class DateValue extends ColumnValue {
     }
 
     @Override
+    public void setColumnName(String columnName) {
+	super.columnName = columnName;	
+    }
+
+    @Override
+    public String getColumnName() {
+	return super.columnName;
+    }
+    
+    @Override
     public void setColumnType(ColumnType columnType) {
 	super.columnType = columnType;
     }

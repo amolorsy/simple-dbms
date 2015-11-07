@@ -14,6 +14,16 @@ public class CharValue extends ColumnValue {
     public String getValue() {
 	return value;
     }
+    
+    @Override
+    public void setColumnName(String columnName) {
+	super.columnName = columnName;
+    }
+
+    @Override
+    public String getColumnName() {
+	return super.columnName;
+    }
 
     @Override
     public void setColumnType(ColumnType columnType) {

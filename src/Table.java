@@ -106,7 +106,7 @@ public class Table implements Serializable {
 		    /* Set key type of column of primary key */
 		    if (!column.canHaveNullValue()) {
 			// The column of primary key must not be null
-			if (column.getColumnType().equals("FOR"))
+			if (column.getKeyType().equals("FOR"))
 			    column.setKeyType("PRI/FOR");
 			else
 			    column.setKeyType("PRI");
