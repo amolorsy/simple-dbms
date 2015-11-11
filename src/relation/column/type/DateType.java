@@ -1,10 +1,10 @@
-package column.type;
+package relation.column.type;
 
-public class IntType extends ColumnType {
+public class DateType extends ColumnType {
     private static final long serialVersionUID = 1L;
 
     @Override
     public String toString() {
-	return "int";
+	return "date";
     }
 }

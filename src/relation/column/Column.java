@@ -1,8 +1,10 @@
-package column;
+package relation.column;
 
 import java.io.Serializable;
+import java.util.List;
 
-import column.type.ColumnType;
+import relation.column.type.ColumnType;
+import relation.column.value.ColumnValue;
 
 public class Column implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -11,6 +13,8 @@ public class Column implements Serializable {
 
     private String columnName;
     private ColumnType columnType;
+    
+    private List<ColumnValue> columnValues;
 
     private String keyType;
 
@@ -49,5 +53,21 @@ public class Column implements Serializable {
 
     public boolean canHaveNullValue() {
 	return canHaveNullValue;
+    }
+    
+    public boolean isPrimaryKeyColumn() {
+	return keyType.contains("PRI");
+    }
+    
+    public boolean isForeignKeyColumn() {
+	return keyType.contains("FOR");
+    }
+    
+    public void addColumnValue(ColumnValue columnValue) {
+	columnValues.add(columnValue);
+    }
+    
+    public List<ColumnValue> getColumnValues() {
+	return columnValues;
     }
 }

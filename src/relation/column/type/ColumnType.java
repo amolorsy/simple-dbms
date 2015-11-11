@@ -1,4 +1,4 @@
-package column.type;
+package relation.column.type;
 
 import java.io.Serializable;
 

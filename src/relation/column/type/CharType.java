@@ -1,4 +1,4 @@
-package column.type;
+package relation.column.type;
 
 public class CharType extends ColumnType {
     private static final long serialVersionUID = 1L;
