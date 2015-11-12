@@ -10,6 +10,7 @@ import predicate.WhereClause;
 import relation.column.Column;
 import relation.column.ReferencedColumn;
 import relation.column.type.CharType;
+import relation.column.value.CharValue;
 import relation.column.value.ColumnValue;
 import util.Message;
 
@@ -64,7 +65,7 @@ public class Table implements Serializable {
 	tableColumnDictionary.put(column.getColumnName(), column);
 	tableColumns.add(column);
     }
-    
+
     public Map<String, Column> getTableColumnDictionary() {
 	return tableColumnDictionary;
     }
@@ -108,7 +109,6 @@ public class Table implements Serializable {
 	    return;
 	} else {
 	    /* Start primary key definition */
-
 	    for (String columnName : columnNameList) {
 		if (!tableColumnDictionary.containsKey(columnName)) {
 		    Message.getInstance()
@@ -237,6 +237,7 @@ public class Table implements Serializable {
 	    Column pickedColumn = pickedColumns.get(i);
 	    ColumnValue columnValue = columnValueList.get(i);
 
+	    // When a column value is null
 	    if (columnValue == null) {
 		if (pickedColumn.isPrimaryKeyColumn()) {
 		    Message.getInstance()
@@ -248,6 +249,7 @@ public class Table implements Serializable {
 		    return;
 		}
 	    } else {
+		// When a column value is not null
 		if (pickedColumn.isForeignKeyColumn()) {
 		    Table referencedTable = RecordManager.getInstance()
 			    .load(pickedColumn.getReferencedColumn().getTableName());
@@ -266,11 +268,21 @@ public class Table implements Serializable {
 			return;
 		    }
 		}
+
+		if ((columnValue.getColumnType() instanceof CharType)
+			&& (pickedColumn.getColumnType() instanceof CharType)) {
+		    String value = ((CharValue) columnValue).getValue();
+		    int size = ((CharType) pickedColumn.getColumnType()).getSize();
+
+		    if (value.length() > size) {
+			((CharValue) columnValue).setValue(value.substring(0, size));
+		    }
+		}
 	    }
 
 	    columnValue.setTableName(getTableName());
 	    columnValue.setColumnName(pickedColumn.getColumnName());
-	    
+
 	    pickedColumn.addColumnValue(columnValue);
 	    tuple.addColumnValue(columnValue);
 	}
@@ -285,6 +297,7 @@ public class Table implements Serializable {
     public int deleteTuples(WhereClause whereClause) {
 	updateTables = new ArrayList<String>();
 
+	// When where clause doesn't exist
 	if (whereClause == null) {
 	    int count = tuples.size();
 	    tuples.clear();
@@ -323,9 +336,10 @@ public class Table implements Serializable {
 	    }
 	    return count;
 	} else {
+	    // When where clause exists
 	    int count = 0;
 	    List<Tuple> removeTuples = new ArrayList<Tuple>();
-	    
+
 	    for (Tuple tuple : tuples) {
 		if (whereClause.compute(tuple)) {
 		    removeTuples.add(tuple);
@@ -339,6 +353,7 @@ public class Table implements Serializable {
 	}
     }
 
+    /* return table that is produced by cartesian product of table A and B */
     public Table cartesianProduct(Table rightTable) {
 	if (rightTable == null)
 	    return this;

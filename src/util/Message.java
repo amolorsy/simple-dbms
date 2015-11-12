@@ -1,4 +1,5 @@
 package util;
+
 import java.util.ArrayList;
 
 public class Message {
@@ -46,11 +47,16 @@ public class Message {
     public static final int PRINT_DELETE = 35;
     public static final int PRINT_SELECT = 36;
 
-    /* For create table, desc command, schemaErrors is used to store errors of execution */
+    /*
+     * For create table, desc command, schemaErrors is used to store errors of
+     * execution
+     */
     private ArrayList<Unit> schemaErrors;
 
-    /* For create table command, commandResults is used to store success execution results
-     * For drop table command, commandResults is used to store dropping execution results of tables
+    /*
+     * For create table command, commandResults is used to store success
+     * execution results For drop table command, commandResults is used to store
+     * dropping execution results of tables
      */
     private ArrayList<Unit> commandResults;
 

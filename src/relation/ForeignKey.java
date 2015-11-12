@@ -1,4 +1,5 @@
 package relation;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +10,7 @@ import relation.column.Column;
 
 public class ForeignKey implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     private Table foreignKeyingTable;
     private List<Column> foreignKeyColumns;
     private Map<String, Column> foreignKeyColumnDictionary;
@@ -40,7 +41,7 @@ public class ForeignKey implements Serializable {
     public List<Column> getForeignKeyColumns() {
 	return foreignKeyColumns;
     }
-    
+
     public Map<String, Column> getForeignKeyColumnDictionary() {
 	return foreignKeyColumnDictionary;
     }
@@ -61,7 +62,7 @@ public class ForeignKey implements Serializable {
     public List<Column> getReferencedColumns() {
 	return referencedColumns;
     }
-    
+
     public Map<String, Column> getReferencedColumnDictionary() {
 	return referencedColumnDictionary;
     }

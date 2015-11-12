@@ -212,6 +212,7 @@ public class RecordManager {
 	    System.out.println("-------------------------------------------------");
     }
 
+    /* For select command */
     public void printTuples(ArrayList<ReferedTable> referenceTables, ArrayList<SelectColumn> selectColumns,
 	    WhereClause whereClause) {
 	for (ReferedTable referenceTable : referenceTables) {
@@ -222,6 +223,7 @@ public class RecordManager {
 	    }
 	}
 
+	// When where clause doesn't exist
 	if (whereClause == null) {
 	    if (referenceTables.size() == 1) {
 		Table table = load(referenceTables.get(0).getTableName());
@@ -405,6 +407,7 @@ public class RecordManager {
 		System.out.println("-----------------------------------------");
 	    }
 	} else {
+	    // When where clause exists
 	    if (referenceTables.size() == 1) {
 		Table table = load(referenceTables.get(0).getTableName());
 		List<Column> tableColumns = table.getTableColumns();

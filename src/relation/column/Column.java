@@ -22,7 +22,7 @@ public class Column implements Serializable {
     private String columnName;
     private ColumnType columnType;
     private List<ColumnValue> columnValues;
-    
+
     private ReferencedColumn referencedColumn;
 
     private String keyType;
@@ -32,11 +32,11 @@ public class Column implements Serializable {
 	canHaveNullValue = true;
 	columnValues = new ArrayList<ColumnValue>();
     }
-    
+
     public void setTableName(String tableName) {
 	this.tableName = tableName;
     }
-    
+
     public String getTableName() {
 	return tableName;
     }
@@ -72,46 +72,44 @@ public class Column implements Serializable {
     public boolean canHaveNullValue() {
 	return canHaveNullValue;
     }
-    
+
     public boolean isPrimaryKeyColumn() {
 	return keyType.contains("PRI");
     }
-    
+
     public boolean isForeignKeyColumn() {
 	return keyType.contains("FOR");
     }
-    
+
     public void addColumnValue(ColumnValue columnValue) {
 	columnValues.add(columnValue);
     }
-    
+
     public List<ColumnValue> getColumnValues() {
 	return columnValues;
     }
-    
+
     public boolean containColumnValues(ColumnValue columnValue) {
 	for (ColumnValue value : columnValues) {
 	    if (value.getColumnType() instanceof CharType && columnValue.getColumnType() instanceof CharType) {
 		if (((CharValue) value).getValue().compareTo(((CharValue) columnValue).getValue()) == 0)
 		    return true;
-	    }
-	    else if (value.getColumnType() instanceof IntType && columnValue.getColumnType() instanceof IntType) {
+	    } else if (value.getColumnType() instanceof IntType && columnValue.getColumnType() instanceof IntType) {
 		if (((IntValue) value).getValue().compareTo(((IntValue) columnValue).getValue()) == 0)
 		    return true;
-	    }
-	    else if (value.getColumnType() instanceof DateType && columnValue.getColumnType() instanceof DateType) {
+	    } else if (value.getColumnType() instanceof DateType && columnValue.getColumnType() instanceof DateType) {
 		if (((DateValue) value).getValue().compareTo(((DateValue) columnValue).getValue()) == 0)
 		    return true;
 	    }
 	}
-	
+
 	return false;
     }
-    
+
     public void setReferencedColumn(ReferencedColumn referencedColumn) {
 	this.referencedColumn = referencedColumn;
     }
-    
+
     public ReferencedColumn getReferencedColumn() {
 	return referencedColumn;
     }
