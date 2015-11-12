@@ -45,8 +45,15 @@ public class ColumnValue extends CompOperand implements Serializable {
 	
 	List<ColumnValue> columnValues = tuple.getColumnValues();
 	for (ColumnValue columnValue : columnValues) {
-	    if (columnName.equals(columnValue.getColumnName()))
-		return columnValue;
+	    if (columnName.equals(columnValue.getColumnName())) {
+		if (tableName != null) {
+		    if (tableName.equals(columnValue.getTableName()))
+			return columnValue;
+		}
+		else {
+		    return columnValue;
+		}
+	    }
 	}
 	
 	// When the column doesn't exist

@@ -233,13 +233,22 @@ public class RecordManager {
 		    for (Column column : tableColumns)
 			System.out.print("| " + column.getColumnName().toUpperCase() + " ");
 		} else {
-		    for (Column column : tableColumns) {
-			for (SelectColumn selectColumn : selectColumns) {
+		    for (SelectColumn selectColumn : selectColumns) {
+			for (Column column : tableColumns) {
 			    if (column.getColumnName().equals(selectColumn.getColumnName())) {
-				if (selectColumn.getNickName() != null)
-				    System.out.print("| " + selectColumn.getNickName().toUpperCase() + " ");
-				else
-				    System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+				if (selectColumn.getTableName() != null) {
+				    if (selectColumn.getTableName().equals(column.getTableName())) {
+					if (selectColumn.getNickName() != null)
+					    System.out.print("| " + selectColumn.getNickName().toUpperCase() + " ");
+					else
+					    System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+				    }
+				} else {
+				    if (selectColumn.getNickName() != null)
+					System.out.print("| " + selectColumn.getNickName().toUpperCase() + " ");
+				    else
+					System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+				}
 			    }
 			}
 		    }
@@ -269,12 +278,24 @@ public class RecordManager {
 		    for (Tuple tuple : tuples) {
 			List<ColumnValue> columnValues = tuple.getColumnValues();
 
-			for (ColumnValue columnValue : columnValues) {
-			    if (columnValue == null)
-				System.out.print("| " + columnValue + " ");
-			    else {
-				for (SelectColumn selectColumn : selectColumns) {
-				    if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
+			for (SelectColumn selectColumn : selectColumns) {
+			    for (ColumnValue columnValue : columnValues) {
+				if (columnValue == null) {
+				    System.out.print("| " + columnValue + " ");
+				    continue;
+				}
+
+				if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
+				    if (selectColumn.getTableName() != null) {
+					if (selectColumn.getTableName().equals(columnValue.getTableName())) {
+					    if (columnValue.getColumnType() instanceof CharType)
+						System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
+					    else if (columnValue.getColumnType() instanceof IntType)
+						System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
+					    else if (columnValue.getColumnType() instanceof DateType)
+						System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+					}
+				    } else {
 					if (columnValue.getColumnType() instanceof CharType)
 					    System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
 					else if (columnValue.getColumnType() instanceof IntType)
@@ -304,13 +325,22 @@ public class RecordManager {
 		    for (Column column : tableColumns)
 			System.out.print("| " + column.getColumnName().toUpperCase() + " ");
 		} else {
-		    for (Column column : tableColumns) {
-			for (SelectColumn selectColumn : selectColumns) {
+		    for (SelectColumn selectColumn : selectColumns) {
+			for (Column column : tableColumns) {
 			    if (column.getColumnName().equals(selectColumn.getColumnName())) {
-				if (selectColumn.getNickName() != null)
-				    System.out.print("| " + selectColumn.getNickName().toUpperCase() + " ");
-				else
-				    System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+				if (selectColumn.getTableName() != null) {
+				    if (selectColumn.getTableName().equals(column.getTableName())) {
+					if (selectColumn.getNickName() != null)
+					    System.out.print("| " + selectColumn.getNickName().toUpperCase() + " ");
+					else
+					    System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+				    }
+				} else {
+				    if (selectColumn.getNickName() != null)
+					System.out.print("| " + selectColumn.getNickName().toUpperCase() + " ");
+				    else
+					System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+				}
 			    }
 			}
 		    }
@@ -327,7 +357,7 @@ public class RecordManager {
 				System.out.print("| " + columnValue + " ");
 				continue;
 			    }
-			    
+
 			    if (columnValue.getColumnType() instanceof CharType)
 				System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
 			    else if (columnValue.getColumnType() instanceof IntType)
@@ -341,20 +371,31 @@ public class RecordManager {
 		    for (Tuple tuple : tuples) {
 			List<ColumnValue> columnValues = tuple.getColumnValues();
 
-			for (ColumnValue columnValue : columnValues) {
-			    if (columnValue == null) {
-				System.out.print("| " + columnValue + " ");
-				continue;
-			    }
-			    
-			    for (SelectColumn selectColumn : selectColumns) {
+			for (SelectColumn selectColumn : selectColumns) {
+			    for (ColumnValue columnValue : columnValues) {
+				if (columnValue == null) {
+				    System.out.print("| " + columnValue + " ");
+				    continue;
+				}
+
 				if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
-				    if (columnValue.getColumnType() instanceof CharType)
-					System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
-				    else if (columnValue.getColumnType() instanceof IntType)
-					System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
-				    else if (columnValue.getColumnType() instanceof DateType)
-					System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+				    if (selectColumn.getTableName() != null) {
+					if (selectColumn.getTableName().equals(columnValue.getTableName())) {
+					    if (columnValue.getColumnType() instanceof CharType)
+						System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
+					    else if (columnValue.getColumnType() instanceof IntType)
+						System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
+					    else if (columnValue.getColumnType() instanceof DateType)
+						System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+					}
+				    } else {
+					if (columnValue.getColumnType() instanceof CharType)
+					    System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
+					else if (columnValue.getColumnType() instanceof IntType)
+					    System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
+					else if (columnValue.getColumnType() instanceof DateType)
+					    System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+				    }
 				}
 			    }
 			}
@@ -369,75 +410,99 @@ public class RecordManager {
 		List<Column> tableColumns = table.getTableColumns();
 		List<Tuple> tuples = table.getTuples();
 
-		System.out.println("-----------------------------------------");
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("-----------------------------------------").append("\n");
 		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
 		    for (Column column : tableColumns)
-			System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+			stringBuilder.append("| " + column.getColumnName().toUpperCase() + " ");
 		} else {
-		    for (Column column : tableColumns) {
-			for (SelectColumn selectColumn : selectColumns) {
+		    for (SelectColumn selectColumn : selectColumns) {
+			for (Column column : tableColumns) {
 			    if (column.getColumnName().equals(selectColumn.getColumnName())) {
-				if (selectColumn.getNickName() != null)
-				    System.out.print("| " + selectColumn.getNickName().toUpperCase() + " ");
-				else
-				    System.out.print("| " + column.getColumnName().toUpperCase() + " ");
-			    }
-			}
-		    }
-		}
-		System.out.println("|");
-		System.out.println("-----------------------------------------");
-
-		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
-		    for (Tuple tuple : tuples) {
-			if (!whereClause.compute(tuple))
-			    continue;
-
-			List<ColumnValue> columnValues = tuple.getColumnValues();
-
-			for (ColumnValue columnValue : columnValues) {
-			    if (columnValue == null) {
-				System.out.print("| " + columnValue + " ");
-				continue;
-			    }
-			    
-			    if (columnValue.getColumnType() instanceof CharType)
-				System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
-			    else if (columnValue.getColumnType() instanceof IntType)
-				System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
-			    else if (columnValue.getColumnType() instanceof DateType)
-				System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
-			}
-			System.out.println("|");
-		    }
-		} else {
-		    for (Tuple tuple : tuples) {
-			if (!whereClause.compute(tuple))
-			    continue;
-
-			List<ColumnValue> columnValues = tuple.getColumnValues();
-
-			for (ColumnValue columnValue : columnValues) {
-			    if (columnValue == null) {
-				System.out.print("| " + columnValue + " ");
-				continue;
-			    }
-			    
-			    for (SelectColumn selectColumn : selectColumns) {
-				if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
-				    if (columnValue.getColumnType() instanceof CharType)
-					System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
-				    else if (columnValue.getColumnType() instanceof IntType)
-					System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
-				    else if (columnValue.getColumnType() instanceof DateType)
-					System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+				if (selectColumn.getTableName() != null) {
+				    if (selectColumn.getTableName().equals(column.getTableName())) {
+					if (selectColumn.getNickName() != null)
+					    stringBuilder.append("| " + selectColumn.getNickName().toUpperCase() + " ");
+					else
+					    stringBuilder.append("| " + column.getColumnName().toUpperCase() + " ");
+				    }
+				} else {
+				    if (selectColumn.getNickName() != null)
+					stringBuilder.append("| " + selectColumn.getNickName().toUpperCase() + " ");
+				    else
+					stringBuilder.append("| " + column.getColumnName().toUpperCase() + " ");
 				}
 			    }
 			}
-			System.out.println("|");
 		    }
 		}
-		System.out.println("-----------------------------------------");
+		stringBuilder.append("|").append("\n");
+		stringBuilder.append("-----------------------------------------").append("\n");
+
+		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
+		    for (Tuple tuple : tuples) {
+			if (!whereClause.compute(tuple))
+			    continue;
+
+			List<ColumnValue> columnValues = tuple.getColumnValues();
+
+			for (ColumnValue columnValue : columnValues) {
+			    if (columnValue == null) {
+				stringBuilder.append("| " + columnValue + " ");
+				continue;
+			    }
+
+			    if (columnValue.getColumnType() instanceof CharType)
+				stringBuilder.append("| " + ((CharValue) columnValue).getValue() + " ");
+			    else if (columnValue.getColumnType() instanceof IntType)
+				stringBuilder.append("| " + ((IntValue) columnValue).getValue() + " ");
+			    else if (columnValue.getColumnType() instanceof DateType)
+				stringBuilder.append("| " + ((DateValue) columnValue).getValue() + " ");
+			}
+			stringBuilder.append("|").append("\n");
+		    }
+		} else {
+		    for (Tuple tuple : tuples) {
+			if (!whereClause.compute(tuple))
+			    continue;
+
+			List<ColumnValue> columnValues = tuple.getColumnValues();
+
+			for (SelectColumn selectColumn : selectColumns) {
+			    for (ColumnValue columnValue : columnValues) {
+				if (columnValue == null) {
+				    stringBuilder.append("| " + columnValue + " ");
+				    continue;
+				}
+
+				if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
+				    if (selectColumn.getTableName() != null) {
+					if (selectColumn.getTableName().equals(columnValue.getTableName())) {
+					    if (columnValue.getColumnType() instanceof CharType)
+						stringBuilder.append("| " + ((CharValue) columnValue).getValue() + " ");
+					    else if (columnValue.getColumnType() instanceof IntType)
+						stringBuilder.append("| " + ((IntValue) columnValue).getValue() + " ");
+					    else if (columnValue.getColumnType() instanceof DateType)
+						stringBuilder.append("| " + ((DateValue) columnValue).getValue() + " ");
+					}
+				    } else {
+					if (columnValue.getColumnType() instanceof CharType)
+					    stringBuilder.append("| " + ((CharValue) columnValue).getValue() + " ");
+					else if (columnValue.getColumnType() instanceof IntType)
+					    stringBuilder.append("| " + ((IntValue) columnValue).getValue() + " ");
+					else if (columnValue.getColumnType() instanceof DateType)
+					    stringBuilder.append("| " + ((DateValue) columnValue).getValue() + " ");
+				    }
+				}
+			    }
+			}
+			stringBuilder.append("|").append("\n");
+		    }
+		}
+		stringBuilder.append("-----------------------------------------");
+
+		if (!Message.getInstance().isSchemaErrorExist())
+		    System.out.println(stringBuilder.toString());
 	    } else {
 		Table table = load(referenceTables.get(0).getTableName());
 		for (int i = 1; i < referenceTables.size(); i++) {
@@ -448,75 +513,97 @@ public class RecordManager {
 		List<Column> tableColumns = table.getTableColumns();
 		List<Tuple> tuples = table.getTuples();
 
-		System.out.println("-----------------------------------------");
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("-----------------------------------------").append("\n");
 		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
 		    for (Column column : tableColumns)
-			System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+			stringBuilder.append("| " + column.getColumnName().toUpperCase() + " ");
 		} else {
-		    for (Column column : tableColumns) {
-			for (SelectColumn selectColumn : selectColumns) {
+		    for (SelectColumn selectColumn : selectColumns) {
+			for (Column column : tableColumns) {
 			    if (column.getColumnName().equals(selectColumn.getColumnName())) {
-				if (selectColumn.getNickName() != null)
-				    System.out.print("| " + selectColumn.getNickName().toUpperCase() + " ");
-				else
-				    System.out.print("| " + column.getColumnName().toUpperCase() + " ");
-			    }
-			}
-		    }
-		}
-		System.out.println("|");
-		System.out.println("-----------------------------------------");
-
-		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
-		    for (Tuple tuple : tuples) {
-			if (!whereClause.compute(tuple))
-			    continue;
-
-			List<ColumnValue> columnValues = tuple.getColumnValues();
-
-			for (ColumnValue columnValue : columnValues) {
-			    if (columnValue == null) {
-				System.out.print("| " + columnValue + " ");
-				continue;
-			    }
-			    
-			    if (columnValue.getColumnType() instanceof CharType)
-				System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
-			    else if (columnValue.getColumnType() instanceof IntType)
-				System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
-			    else if (columnValue.getColumnType() instanceof DateType)
-				System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
-			}
-			System.out.println("|");
-		    }
-		} else {
-		    for (Tuple tuple : tuples) {
-			if (!whereClause.compute(tuple))
-			    continue;
-
-			List<ColumnValue> columnValues = tuple.getColumnValues();
-
-			for (ColumnValue columnValue : columnValues) {
-			    if (columnValue == null) {
-				System.out.print("| " + columnValue + " ");
-				continue;
-			    }
-			    
-			    for (SelectColumn selectColumn : selectColumns) {
-				if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
-				    if (columnValue.getColumnType() instanceof CharType)
-					System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
-				    else if (columnValue.getColumnType() instanceof IntType)
-					System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
-				    else if (columnValue.getColumnType() instanceof DateType)
-					System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+				if (selectColumn.getTableName() != null) {
+				    if (selectColumn.getTableName().equals(column.getTableName())) {
+					if (selectColumn.getNickName() != null)
+					    stringBuilder.append("| " + selectColumn.getNickName().toUpperCase() + " ");
+					else
+					    stringBuilder.append("| " + column.getColumnName().toUpperCase() + " ");
+				    }
+				} else {
+				    if (selectColumn.getNickName() != null)
+					stringBuilder.append("| " + selectColumn.getNickName().toUpperCase() + " ");
+				    else
+					stringBuilder.append("| " + column.getColumnName().toUpperCase() + " ");
 				}
 			    }
 			}
-			System.out.println("|");
 		    }
 		}
-		System.out.println("-----------------------------------------");
+		stringBuilder.append("|").append("\n");
+		stringBuilder.append("-----------------------------------------").append("\n");
+
+		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
+		    for (Tuple tuple : tuples) {
+			if (!whereClause.compute(tuple)) {
+			    continue;
+			}
+
+			List<ColumnValue> columnValues = tuple.getColumnValues();
+			for (ColumnValue columnValue : columnValues) {
+			    if (columnValue == null) {
+				stringBuilder.append("| " + columnValue + " ");
+				continue;
+			    }
+
+			    if (columnValue.getColumnType() instanceof CharType)
+				stringBuilder.append("| " + ((CharValue) columnValue).getValue() + " ");
+			    else if (columnValue.getColumnType() instanceof IntType)
+				stringBuilder.append("| " + ((IntValue) columnValue).getValue() + " ");
+			    else if (columnValue.getColumnType() instanceof DateType)
+				stringBuilder.append("| " + ((DateValue) columnValue).getValue() + " ");
+			}
+			stringBuilder.append("|").append("\n");
+		    }
+		} else {
+		    for (Tuple tuple : tuples) {
+			if (!whereClause.compute(tuple))
+			    continue;
+
+			List<ColumnValue> columnValues = tuple.getColumnValues();
+			for (SelectColumn selectColumn : selectColumns) {
+			    for (ColumnValue columnValue : columnValues) {
+				if (columnValue == null) {
+				    stringBuilder.append("| " + columnValue + " ");
+				    continue;
+				}
+				if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
+				    if (selectColumn.getTableName() != null) {
+					if (selectColumn.getTableName().equals(columnValue.getTableName())) {
+					    if (columnValue.getColumnType() instanceof CharType)
+						stringBuilder.append("| " + ((CharValue) columnValue).getValue() + " ");
+					    else if (columnValue.getColumnType() instanceof IntType)
+						stringBuilder.append("| " + ((IntValue) columnValue).getValue() + " ");
+					    else if (columnValue.getColumnType() instanceof DateType)
+						stringBuilder.append("| " + ((DateValue) columnValue).getValue() + " ");
+					}
+				    } else {
+					if (columnValue.getColumnType() instanceof CharType)
+					    stringBuilder.append("| " + ((CharValue) columnValue).getValue() + " ");
+					else if (columnValue.getColumnType() instanceof IntType)
+					    stringBuilder.append("| " + ((IntValue) columnValue).getValue() + " ");
+					else if (columnValue.getColumnType() instanceof DateType)
+					    stringBuilder.append("| " + ((DateValue) columnValue).getValue() + " ");
+				    }
+				}
+			    }
+			}
+			stringBuilder.append("|").append("\n");
+		    }
+		}
+		stringBuilder.append("-----------------------------------------");
+
+		if (!Message.getInstance().isSchemaErrorExist())
+		    System.out.println(stringBuilder.toString());
 	    }
 	}
     }

@@ -53,16 +53,18 @@ public class Table implements Serializable {
 
     public void addColumn(Column column) {
 	if (tableColumnDictionary.containsKey(column.getColumnName())) {
-	    // DUPLICATE_COMLUMN_DEF_ERROR
-	    Message.getInstance().addSchemaError(new Message.Unit(Message.DUPLICATE_COLUMN_DEF_ERROR, null));
-	    return;
+	    if (tableColumnDictionary.get(column.getColumnName()).getTableName().equals(column.getTableName())) {
+		// DUPLICATE_COMLUMN_DEF_ERROR
+		Message.getInstance().addSchemaError(new Message.Unit(Message.DUPLICATE_COLUMN_DEF_ERROR, null));
+		return;
+	    }
 	}
 
 	// Insert column
 	tableColumnDictionary.put(column.getColumnName(), column);
 	tableColumns.add(column);
     }
-
+    
     public Map<String, Column> getTableColumnDictionary() {
 	return tableColumnDictionary;
     }
@@ -343,7 +345,6 @@ public class Table implements Serializable {
 
 	Table table = new Table();
 	table.setTableName(tableName + " X " + rightTable.getTableName());
-
 	List<Column> leftColumns = tableColumns;
 	List<Column> rightColumns = rightTable.getTableColumns();
 
@@ -356,7 +357,7 @@ public class Table implements Serializable {
 
 	List<Tuple> leftTuples = tuples;
 	List<Tuple> rightTuples = rightTable.getTuples();
-	List<Tuple> tuples = new ArrayList<Tuple>();
+	List<Tuple> newTuples = new ArrayList<Tuple>();
 
 	for (Tuple leftTuple : leftTuples) {
 	    List<ColumnValue> leftValues = leftTuple.getColumnValues();
@@ -370,11 +371,11 @@ public class Table implements Serializable {
 		for (ColumnValue columnValue : rightValues)
 		    tuple.addColumnValue(columnValue);
 
-		tuples.add(tuple);
+		newTuples.add(tuple);
 	    }
 	}
 
-	table.setTuples(tuples);
+	table.setTuples(newTuples);
 	return table;
     }
 

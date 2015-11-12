@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import relation.ForeignKey;
 import relation.column.type.CharType;
 import relation.column.type.ColumnType;
 import relation.column.type.DateType;
@@ -19,6 +18,7 @@ public class Column implements Serializable {
 
     private boolean canHaveNullValue;
 
+    private String tableName;
     private String columnName;
     private ColumnType columnType;
     private List<ColumnValue> columnValues;
@@ -31,6 +31,14 @@ public class Column implements Serializable {
 	this.keyType = "";
 	canHaveNullValue = true;
 	columnValues = new ArrayList<ColumnValue>();
+    }
+    
+    public void setTableName(String tableName) {
+	this.tableName = tableName;
+    }
+    
+    public String getTableName() {
+	return tableName;
     }
 
     public void setColumnName(String columnName) {
