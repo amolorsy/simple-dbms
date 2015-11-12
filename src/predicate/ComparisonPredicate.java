@@ -56,7 +56,7 @@ public class ComparisonPredicate implements Predicate {
 	} else if (leftValue.getColumnType() instanceof CharType && rightValue.getColumnType() instanceof CharType) {
 	    CharValue leftCharValue = (CharValue) leftValue;
 	    CharValue rightCharValue = (CharValue) rightValue;
-
+	    
 	    switch (compOperator) {
 	    case "<":
 		return leftCharValue.getValue().compareTo(rightCharValue.getValue()) < 0;
@@ -74,7 +74,7 @@ public class ComparisonPredicate implements Predicate {
 	} else if (leftValue.getColumnType() instanceof DateType && rightValue.getColumnType() instanceof DateType) {
 	    DateValue leftDateValue = (DateValue) leftValue;
 	    DateValue rightDateValue = (DateValue) rightValue;
-
+	    
 	    switch (compOperator) {
 	    case "<":
 		return leftDateValue.getValue().compareTo(rightDateValue.getValue()) < 0;

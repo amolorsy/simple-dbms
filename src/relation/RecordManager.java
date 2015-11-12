@@ -23,6 +23,7 @@ import com.sleepycat.je.LockMode;
 
 import predicate.WhereClause;
 import relation.column.Column;
+import relation.column.SelectColumn;
 import relation.column.type.CharType;
 import relation.column.type.DateType;
 import relation.column.type.IntType;
@@ -31,7 +32,6 @@ import relation.column.value.ColumnValue;
 import relation.column.value.DateValue;
 import relation.column.value.IntValue;
 import util.Message;
-import util.SelectColumn;
 
 public class RecordManager {
     private static RecordManager instance;
@@ -212,122 +212,312 @@ public class RecordManager {
 	    System.out.println("-------------------------------------------------");
     }
 
-    public void printTuples(WhereClause whereClause) {
-	List<String> referenceTables = whereClause.getReferenceTables();
-	List<SelectColumn> selectColumns = whereClause.getSelectColumns();
-
-	if (referenceTables.size() == 1) {
-	    Table table = load(referenceTables.get(0));
-	    List<Column> tableColumns = table.getTableColumns();
-	    List<Tuple> tuples = table.getTuples();
-
-	    System.out.println("+----------------+-------------+---------+");
-	    if (selectColumns.size() == 1 && selectColumns.get(0).equals("*")) {
-		for (Column column : tableColumns)
-		    System.out.print("| " + column.getColumnName().toUpperCase());
-	    } else {
-		for (Column column : tableColumns) {
-		    for (SelectColumn selectColumn : selectColumns) {
-			if (column.getColumnName().equals(selectColumn.getColumnName()))
-			    System.out.print("| " + column.getColumnName().toUpperCase());
-		    }
-		}
+    public void printTuples(ArrayList<ReferedTable> referenceTables, ArrayList<SelectColumn> selectColumns,
+	    WhereClause whereClause) {
+	for (ReferedTable referenceTable : referenceTables) {
+	    if (!isTableExist(referenceTable.getTableName())) {
+		Message.getInstance().addSchemaError(
+			new Message.Unit(Message.SELECT_TABLE_EXISTENCE_ERROR, referenceTable.getTableName()));
+		return;
 	    }
-	    System.out.println("|");
-
-	    System.out.println("+----------------+-------------+---------+");
-	    if (selectColumns.size() == 1 && selectColumns.get(0).equals("*")) {
-		for (Tuple tuple : tuples) {
-		    List<ColumnValue> columnValues = tuple.getColumnValues();
-
-		    for (ColumnValue columnValue : columnValues) {
-			if (columnValue.getColumnType() instanceof CharType)
-			    System.out.print("| " + ((CharValue) columnValue).getValue());
-			else if (columnValue.getColumnType() instanceof IntType)
-			    System.out.print("| " + ((IntValue) columnValue).getValue());
-			else if (columnValue.getColumnType() instanceof DateType)
-			    System.out.print("| " + ((DateValue) columnValue).getValue());
-		    }
-		}
-	    } else {
-		for (Tuple tuple : tuples) {
-		    List<ColumnValue> columnValues = tuple.getColumnValues();
-
-		    for (ColumnValue columnValue : columnValues) {
-			for (SelectColumn selectColumn : selectColumns) {
-			    if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
-				if (columnValue.getColumnType() instanceof CharType)
-				    System.out.print("| " + ((CharValue) columnValue).getValue());
-				else if (columnValue.getColumnType() instanceof IntType)
-				    System.out.print("| " + ((IntValue) columnValue).getValue());
-				else if (columnValue.getColumnType() instanceof DateType)
-				    System.out.print("| " + ((DateValue) columnValue).getValue());
-			    }
-			}
-		    }
-		}
-	    }
-	    System.out.println("|");
-	    System.out.println("+----------------+-------------+---------+");
 	}
-	else {
-	    Table table = load(referenceTables.get(0));
-	    for (int i = 1; i < referenceTables.size(); i++) {
-		Table rightTable = load(referenceTables.get(i));
-		table = table.cartesianProduct(rightTable);
-	    }
 
-	    List<Column> tableColumns = table.getTableColumns();
-	    List<Tuple> tuples = table.getTuples();
+	if (whereClause == null) {
+	    if (referenceTables.size() == 1) {
+		Table table = load(referenceTables.get(0).getTableName());
+		List<Column> tableColumns = table.getTableColumns();
+		List<Tuple> tuples = table.getTuples();
 
-	    System.out.println("+----------------+-------------+---------+");
-	    if (selectColumns.size() == 1 && selectColumns.get(0).equals("*")) {
-		for (Column column : tableColumns)
-		    System.out.print("| " + column.getColumnName().toUpperCase());
-	    } else {
-		for (Column column : tableColumns) {
-		    for (SelectColumn selectColumn : selectColumns) {
-			if (column.getColumnName().equals(selectColumn.getColumnName()))
-			    System.out.print("| " + column.getColumnName().toUpperCase());
-		    }
-		}
-	    }
-	    System.out.println("|");
-
-	    System.out.println("+----------------+-------------+---------+");
-	    if (selectColumns.size() == 1 && selectColumns.get(0).equals("*")) {
-		for (Tuple tuple : tuples) {
-		    List<ColumnValue> columnValues = tuple.getColumnValues();
-
-		    for (ColumnValue columnValue : columnValues) {
-			if (columnValue.getColumnType() instanceof CharType)
-			    System.out.print("| " + ((CharValue) columnValue).getValue());
-			else if (columnValue.getColumnType() instanceof IntType)
-			    System.out.print("| " + ((IntValue) columnValue).getValue());
-			else if (columnValue.getColumnType() instanceof DateType)
-			    System.out.print("| " + ((DateValue) columnValue).getValue());
-		    }
-		}
-	    } else {
-		for (Tuple tuple : tuples) {
-		    List<ColumnValue> columnValues = tuple.getColumnValues();
-
-		    for (ColumnValue columnValue : columnValues) {
+		System.out.println("-----------------------------------------");
+		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
+		    for (Column column : tableColumns)
+			System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+		} else {
+		    for (Column column : tableColumns) {
 			for (SelectColumn selectColumn : selectColumns) {
-			    if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
-				if (columnValue.getColumnType() instanceof CharType)
-				    System.out.print("| " + ((CharValue) columnValue).getValue());
-				else if (columnValue.getColumnType() instanceof IntType)
-				    System.out.print("| " + ((IntValue) columnValue).getValue());
-				else if (columnValue.getColumnType() instanceof DateType)
-				    System.out.print("| " + ((DateValue) columnValue).getValue());
+			    if (column.getColumnName().equals(selectColumn.getColumnName())) {
+				if (selectColumn.getNickName() != null)
+				    System.out.print("| " + selectColumn.getNickName().toUpperCase() + " ");
+				else
+				    System.out.print("| " + column.getColumnName().toUpperCase() + " ");
 			    }
 			}
 		    }
 		}
+		System.out.println("|");
+		System.out.println("-----------------------------------------");
+
+		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
+		    for (Tuple tuple : tuples) {
+			List<ColumnValue> columnValues = tuple.getColumnValues();
+
+			for (ColumnValue columnValue : columnValues) {
+			    if (columnValue == null)
+				System.out.print("| " + columnValue + " ");
+			    else {
+				if (columnValue.getColumnType() instanceof CharType)
+				    System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
+				else if (columnValue.getColumnType() instanceof IntType)
+				    System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
+				else if (columnValue.getColumnType() instanceof DateType)
+				    System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+			    }
+			}
+			System.out.println("|");
+		    }
+		} else {
+		    for (Tuple tuple : tuples) {
+			List<ColumnValue> columnValues = tuple.getColumnValues();
+
+			for (ColumnValue columnValue : columnValues) {
+			    if (columnValue == null)
+				System.out.print("| " + columnValue + " ");
+			    else {
+				for (SelectColumn selectColumn : selectColumns) {
+				    if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
+					if (columnValue.getColumnType() instanceof CharType)
+					    System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
+					else if (columnValue.getColumnType() instanceof IntType)
+					    System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
+					else if (columnValue.getColumnType() instanceof DateType)
+					    System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+				    }
+				}
+			    }
+			}
+			System.out.println("|");
+		    }
+		}
+		System.out.println("-----------------------------------------");
+	    } else {
+		Table table = load(referenceTables.get(0).getTableName());
+		for (int i = 1; i < referenceTables.size(); i++) {
+		    Table rightTable = load(referenceTables.get(i).getTableName());
+		    table = table.cartesianProduct(rightTable);
+		}
+
+		List<Column> tableColumns = table.getTableColumns();
+		List<Tuple> tuples = table.getTuples();
+
+		System.out.println("-----------------------------------------");
+		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
+		    for (Column column : tableColumns)
+			System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+		} else {
+		    for (Column column : tableColumns) {
+			for (SelectColumn selectColumn : selectColumns) {
+			    if (column.getColumnName().equals(selectColumn.getColumnName())) {
+				if (selectColumn.getNickName() != null)
+				    System.out.print("| " + selectColumn.getNickName().toUpperCase() + " ");
+				else
+				    System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+			    }
+			}
+		    }
+		}
+		System.out.println("|");
+		System.out.println("-----------------------------------------");
+
+		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
+		    for (Tuple tuple : tuples) {
+			List<ColumnValue> columnValues = tuple.getColumnValues();
+
+			for (ColumnValue columnValue : columnValues) {
+			    if (columnValue == null) {
+				System.out.print("| " + columnValue + " ");
+				continue;
+			    }
+			    
+			    if (columnValue.getColumnType() instanceof CharType)
+				System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
+			    else if (columnValue.getColumnType() instanceof IntType)
+				System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
+			    else if (columnValue.getColumnType() instanceof DateType)
+				System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+			}
+			System.out.println("|");
+		    }
+		} else {
+		    for (Tuple tuple : tuples) {
+			List<ColumnValue> columnValues = tuple.getColumnValues();
+
+			for (ColumnValue columnValue : columnValues) {
+			    if (columnValue == null) {
+				System.out.print("| " + columnValue + " ");
+				continue;
+			    }
+			    
+			    for (SelectColumn selectColumn : selectColumns) {
+				if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
+				    if (columnValue.getColumnType() instanceof CharType)
+					System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
+				    else if (columnValue.getColumnType() instanceof IntType)
+					System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
+				    else if (columnValue.getColumnType() instanceof DateType)
+					System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+				}
+			    }
+			}
+			System.out.println("|");
+		    }
+		}
+		System.out.println("-----------------------------------------");
 	    }
-	    System.out.println("|");
-	    System.out.println("+----------------+-------------+---------+");
+	} else {
+	    if (referenceTables.size() == 1) {
+		Table table = load(referenceTables.get(0).getTableName());
+		List<Column> tableColumns = table.getTableColumns();
+		List<Tuple> tuples = table.getTuples();
+
+		System.out.println("-----------------------------------------");
+		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
+		    for (Column column : tableColumns)
+			System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+		} else {
+		    for (Column column : tableColumns) {
+			for (SelectColumn selectColumn : selectColumns) {
+			    if (column.getColumnName().equals(selectColumn.getColumnName())) {
+				if (selectColumn.getNickName() != null)
+				    System.out.print("| " + selectColumn.getNickName().toUpperCase() + " ");
+				else
+				    System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+			    }
+			}
+		    }
+		}
+		System.out.println("|");
+		System.out.println("-----------------------------------------");
+
+		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
+		    for (Tuple tuple : tuples) {
+			if (!whereClause.compute(tuple))
+			    continue;
+
+			List<ColumnValue> columnValues = tuple.getColumnValues();
+
+			for (ColumnValue columnValue : columnValues) {
+			    if (columnValue == null) {
+				System.out.print("| " + columnValue + " ");
+				continue;
+			    }
+			    
+			    if (columnValue.getColumnType() instanceof CharType)
+				System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
+			    else if (columnValue.getColumnType() instanceof IntType)
+				System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
+			    else if (columnValue.getColumnType() instanceof DateType)
+				System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+			}
+			System.out.println("|");
+		    }
+		} else {
+		    for (Tuple tuple : tuples) {
+			if (!whereClause.compute(tuple))
+			    continue;
+
+			List<ColumnValue> columnValues = tuple.getColumnValues();
+
+			for (ColumnValue columnValue : columnValues) {
+			    if (columnValue == null) {
+				System.out.print("| " + columnValue + " ");
+				continue;
+			    }
+			    
+			    for (SelectColumn selectColumn : selectColumns) {
+				if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
+				    if (columnValue.getColumnType() instanceof CharType)
+					System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
+				    else if (columnValue.getColumnType() instanceof IntType)
+					System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
+				    else if (columnValue.getColumnType() instanceof DateType)
+					System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+				}
+			    }
+			}
+			System.out.println("|");
+		    }
+		}
+		System.out.println("-----------------------------------------");
+	    } else {
+		Table table = load(referenceTables.get(0).getTableName());
+		for (int i = 1; i < referenceTables.size(); i++) {
+		    Table rightTable = load(referenceTables.get(i).getTableName());
+		    table = table.cartesianProduct(rightTable);
+		}
+
+		List<Column> tableColumns = table.getTableColumns();
+		List<Tuple> tuples = table.getTuples();
+
+		System.out.println("-----------------------------------------");
+		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
+		    for (Column column : tableColumns)
+			System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+		} else {
+		    for (Column column : tableColumns) {
+			for (SelectColumn selectColumn : selectColumns) {
+			    if (column.getColumnName().equals(selectColumn.getColumnName())) {
+				if (selectColumn.getNickName() != null)
+				    System.out.print("| " + selectColumn.getNickName().toUpperCase() + " ");
+				else
+				    System.out.print("| " + column.getColumnName().toUpperCase() + " ");
+			    }
+			}
+		    }
+		}
+		System.out.println("|");
+		System.out.println("-----------------------------------------");
+
+		if (selectColumns.size() == 1 && selectColumns.get(0).getColumnName().equals("*")) {
+		    for (Tuple tuple : tuples) {
+			if (!whereClause.compute(tuple))
+			    continue;
+
+			List<ColumnValue> columnValues = tuple.getColumnValues();
+
+			for (ColumnValue columnValue : columnValues) {
+			    if (columnValue == null) {
+				System.out.print("| " + columnValue + " ");
+				continue;
+			    }
+			    
+			    if (columnValue.getColumnType() instanceof CharType)
+				System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
+			    else if (columnValue.getColumnType() instanceof IntType)
+				System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
+			    else if (columnValue.getColumnType() instanceof DateType)
+				System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+			}
+			System.out.println("|");
+		    }
+		} else {
+		    for (Tuple tuple : tuples) {
+			if (!whereClause.compute(tuple))
+			    continue;
+
+			List<ColumnValue> columnValues = tuple.getColumnValues();
+
+			for (ColumnValue columnValue : columnValues) {
+			    if (columnValue == null) {
+				System.out.print("| " + columnValue + " ");
+				continue;
+			    }
+			    
+			    for (SelectColumn selectColumn : selectColumns) {
+				if (columnValue.getColumnName().equals(selectColumn.getColumnName())) {
+				    if (columnValue.getColumnType() instanceof CharType)
+					System.out.print("| " + ((CharValue) columnValue).getValue() + " ");
+				    else if (columnValue.getColumnType() instanceof IntType)
+					System.out.print("| " + ((IntValue) columnValue).getValue() + " ");
+				    else if (columnValue.getColumnType() instanceof DateType)
+					System.out.print("| " + ((DateValue) columnValue).getValue() + " ");
+				}
+			    }
+			}
+			System.out.println("|");
+		    }
+		}
+		System.out.println("-----------------------------------------");
+	    }
 	}
     }
 }

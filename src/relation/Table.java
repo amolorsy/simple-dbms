@@ -1,4 +1,5 @@
 package relation;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.Map;
 
 import predicate.WhereClause;
 import relation.column.Column;
+import relation.column.ReferencedColumn;
 import relation.column.type.CharType;
 import relation.column.value.ColumnValue;
 import util.Message;
@@ -14,8 +16,8 @@ import util.Message;
 public class Table implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    transient private RecordManager recordManager;
     transient private boolean isSetPrimaryKeyDone;
+    transient private List<String> updateTables;
 
     private String tableName;
     private Map<String, Column> tableColumnDictionary;
@@ -24,20 +26,21 @@ public class Table implements Serializable {
 
     private PrimaryKey primaryKey;
     private List<ForeignKey> foreignKeys;
+    private List<ForeignKey> referencingForeignKeys;
 
     private List<Tuple> tuples;
 
     public Table() {
-	this.recordManager = RecordManager.getInstance();
 	this.isSetPrimaryKeyDone = false;
 
 	tableColumnDictionary = new HashMap<String, Column>();
 	tableColumns = new ArrayList<Column>();
-
 	primaryKey = new PrimaryKey();
 	foreignKeys = new ArrayList<ForeignKey>();
-
+	referencingForeignKeys = new ArrayList<ForeignKey>();
 	tuples = new ArrayList<Tuple>();
+
+	updateTables = new ArrayList<String>();
     }
 
     public void setTableName(String tableName) {
@@ -88,6 +91,14 @@ public class Table implements Serializable {
 	return foreignKeys;
     }
 
+    public void addReferencingForeignKey(ForeignKey foreignKey) {
+	referencingForeignKeys.add(foreignKey);
+    }
+
+    public List<ForeignKey> getReferencingForeignKey() {
+	return referencingForeignKeys;
+    }
+
     public void setPrimaryKey(ArrayList<String> columnNameList) {
 	// Check if primary key definition done
 	if (isSetPrimaryKeyDone) {
@@ -98,18 +109,18 @@ public class Table implements Serializable {
 
 	    for (String columnName : columnNameList) {
 		if (!tableColumnDictionary.containsKey(columnName)) {
-		    Message.getInstance().addSchemaError(new Message.Unit(Message.NON_EXISTING_COLUMN_DEF_ERROR, columnName));
+		    Message.getInstance()
+		    .addSchemaError(new Message.Unit(Message.NON_EXISTING_COLUMN_DEF_ERROR, columnName));
 		    return;
-		}
-		else if (primaryKey.getPrimaryKeyColumnDictionary().containsKey(columnName)) {
+		} else if (primaryKey.getPrimaryKeyColumnDictionary().containsKey(columnName)) {
 		    Message.getInstance().addSchemaError(new Message.Unit(Message.DUPLICATE_COLUMN_DEF_ERROR, null));
 		    return;
-		}
-		else {
+		} else {
 		    Column column = tableColumnDictionary.get(columnName);
 
 		    /* Set key type of column of primary key */
-		    column.guaranteeNotNull(); // The column of primary key must not be null
+		    column.guaranteeNotNull(); // The column of primary key must
+		    // not be null
 		    if (column.getKeyType().equals("FOR"))
 			column.setKeyType("PRI/FOR");
 		    else
@@ -123,15 +134,16 @@ public class Table implements Serializable {
 	}
     }
 
-    public void setForeignKey(ArrayList<String> columnNameList, String referencedTableName, ArrayList<String> referencedColumnNameList) {
+    public void setForeignKey(ArrayList<String> columnNameList, String referencedTableName,
+	    ArrayList<String> referencedColumnNameList) {
 	ForeignKey foreignKey = new ForeignKey();
 
 	for (String columnName : columnNameList) {
 	    if (!tableColumnDictionary.containsKey(columnName)) {
-		Message.getInstance().addSchemaError(new Message.Unit(Message.NON_EXISTING_COLUMN_DEF_ERROR, columnName));
+		Message.getInstance()
+		.addSchemaError(new Message.Unit(Message.NON_EXISTING_COLUMN_DEF_ERROR, columnName));
 		return;
-	    }
-	    else if (foreignKey.getForeignKeyColumnDictionary().containsKey(columnName)) {
+	    } else if (foreignKey.getForeignKeyColumnDictionary().containsKey(columnName)) {
 		Message.getInstance().addSchemaError(new Message.Unit(Message.DUPLICATE_COLUMN_DEF_ERROR, null));
 		return;
 	    }
@@ -147,46 +159,51 @@ public class Table implements Serializable {
 	}
 
 	// Check if referenced table exists on Berkeley DB
-	if (!recordManager.isTableExist(referencedTableName)) {
+	if (!RecordManager.getInstance().isTableExist(referencedTableName)) {
 	    Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_TABLE_EXISTENCE_ERROR, null));
 	    return;
 	} else {
-	    Table referencedTable = recordManager.getTableDictionary().get(referencedTableName);
+	    Table referencedTable = RecordManager.getInstance().getTableDictionary().get(referencedTableName);
 	    Map<String, Column> referencedTableColumnDictionary = referencedTable.getTableColumnDictionary();
 
 	    if (referencedColumnNameList.size() != referencedTable.getPrimaryKey().getPrimaryKeyColumns().size()) {
-		Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_COLUMNS_PARTIAL_PRIMARY_KEY_COLUMNS_ERROR, null));
-	    	return;
+		Message.getInstance().addSchemaError(
+			new Message.Unit(Message.REFERENCE_COLUMNS_PARTIAL_PRIMARY_KEY_COLUMNS_ERROR, null));
+		return;
 	    }
-	    
+
 	    for (int i = 0; i < referencedColumnNameList.size(); i++) {
 		String referencedColumnName = referencedColumnNameList.get(i);
 		Column referencedColumn = referencedTableColumnDictionary.get(referencedColumnName);
 		Column foreignKeyColumn = foreignKey.getForeignKeyColumns().get(i);
-		
+
 		if (!referencedTableColumnDictionary.containsKey(referencedColumnName)) {
-		    Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_COLUMN_EXISTENCE_ERROR, null));
+		    Message.getInstance()
+		    .addSchemaError(new Message.Unit(Message.REFERENCE_COLUMN_EXISTENCE_ERROR, null));
 		    return;
-		}
-		else if (foreignKey.getReferencedColumnDictionary().containsKey(referencedColumnName)) {
+		} else if (foreignKey.getReferencedColumnDictionary().containsKey(referencedColumnName)) {
 		    Message.getInstance().addSchemaError(new Message.Unit(Message.DUPLICATE_COLUMN_DEF_ERROR, null));
 		    return;
-		}
-		else if (!foreignKeyColumn.getColumnType().toString().equals(referencedColumn.getColumnType().toString())) {
+		} else if (!foreignKeyColumn.getColumnType().toString()
+			.equals(referencedColumn.getColumnType().toString())) {
 		    Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_TYPE_ERROR, null));
 		    return;
-		}
-		else if (!referencedTable.getPrimaryKey().getPrimaryKeyColumns().contains(referencedColumn)) {
-		    Message.getInstance().addSchemaError(new Message.Unit(Message.REFERENCE_NON_PRIMARY_KEY_ERROR, null));
+		} else if (!referencedTable.getPrimaryKey().getPrimaryKeyColumns().contains(referencedColumn)) {
+		    Message.getInstance()
+		    .addSchemaError(new Message.Unit(Message.REFERENCE_NON_PRIMARY_KEY_ERROR, null));
 		    return;
 		}
-		
+
 		foreignKey.addReferencedColumn(referencedColumn);
+		foreignKeyColumn.setReferencedColumn(new ReferencedColumn(referencedTableName, referencedColumn));
 	    }
 
-	    foreignKey.setForeignKeyingTable(this);
 	    foreignKey.setReferencedTable(referencedTable);
+	    foreignKey.setForeignKeyingTable(this);
 	    referencedTable.setReferencingTable(this);
+
+	    referencedTable.addReferencingForeignKey(foreignKey);
+	    updateTables.add(referencedTable.getTableName());
 	}
 
 	foreignKeys.add(foreignKey);
@@ -209,93 +226,141 @@ public class Table implements Serializable {
 	}
 
 	if (pickedColumns.size() != columnValueList.size()) {
-	    Message.getInstance().addSchemaError(new Message.Unit(Message.INSERT_COLUMN_VALUE_CORRESPONDENCE_ERROR, null));
+	    Message.getInstance()
+	    .addSchemaError(new Message.Unit(Message.INSERT_COLUMN_VALUE_CORRESPONDENCE_ERROR, null));
 	    return;
 	}
 
 	for (int i = 0; i < columnValueList.size(); i++) {
-	    Column column = pickedColumns.get(i);
+	    Column pickedColumn = pickedColumns.get(i);
 	    ColumnValue columnValue = columnValueList.get(i);
 
 	    if (columnValue == null) {
-		if (column.isPrimaryKeyColumn()) {
-		    Message.getInstance().addSchemaError(new Message.Unit(Message.INSERT_DUPLICATE_PRIMARY_KEY_ERROR, null));
+		if (pickedColumn.isPrimaryKeyColumn()) {
+		    Message.getInstance()
+		    .addSchemaError(new Message.Unit(Message.INSERT_DUPLICATE_PRIMARY_KEY_ERROR, null));
+		    return;
+		} else if (!pickedColumn.canHaveNullValue()) {
+		    Message.getInstance().addSchemaError(
+			    new Message.Unit(Message.INSERT_COLUMN_NON_NULLABLE_ERROR, pickedColumn.getColumnName()));
 		    return;
 		}
-		else if (!column.canHaveNullValue()) {
-		    Message.getInstance().addSchemaError(new Message.Unit(Message.INSERT_COLUMN_NON_NULLABLE_ERROR, column.getColumnName()));
-		    return;
-		}
-	    }
-	    else {
-		if (column.isForeignKeyColumn())
-		{
-		    for (ForeignKey foreignKey : foreignKeys)
-		    {
-			if (foreignKey.getForeignKeyColumnDictionary().containsKey(column.getColumnName()))
-			{
-			    List<Column> referencedColumns = foreignKey.getReferencedColumns();
-			    if (!columnValue.getColumnType().toString().equals(referencedColumns.get(0).getColumnType().toString())) {
-				Message.getInstance().addSchemaError(new Message.Unit(Message.INSERT_REFERENTIAL_INTEGRITY_ERROR, null));
-				return;
-			    }
-			}
+	    } else {
+		if (pickedColumn.isForeignKeyColumn()) {
+		    Table referencedTable = RecordManager.getInstance()
+			    .load(pickedColumn.getReferencedColumn().getTableName());
+		    String referencedColumnName = pickedColumn.getReferencedColumn().getColumn().getColumnName();
+
+		    if (!referencedTable.getTableColumn(referencedColumnName).containColumnValues(columnValue)) {
+			Message.getInstance()
+			.addSchemaError(new Message.Unit(Message.INSERT_REFERENTIAL_INTEGRITY_ERROR, null));
+			return;
 		    }
-		}
-		else if (!columnValue.getColumnType().toString().equals(column.getColumnType().toString()))
-		{
-		    if (!(columnValue.getColumnType() instanceof CharType) || !(column.getColumnType() instanceof CharType)) {
-			Message.getInstance().addSchemaError(new Message.Unit(Message.INSERT_TYPE_MISMATCH_ERROR, null));
+		} else if (!columnValue.getColumnType().toString().equals(pickedColumn.getColumnType().toString())) {
+		    if (!(columnValue.getColumnType() instanceof CharType)
+			    || !(pickedColumn.getColumnType() instanceof CharType)) {
+			Message.getInstance()
+			.addSchemaError(new Message.Unit(Message.INSERT_TYPE_MISMATCH_ERROR, null));
 			return;
 		    }
 		}
 	    }
 
+	    columnValue.setTableName(getTableName());
+	    columnValue.setColumnName(pickedColumn.getColumnName());
+	    
+	    pickedColumn.addColumnValue(columnValue);
 	    tuple.addColumnValue(columnValue);
-	}	
+	}
 
 	tuples.add(tuple);
     }
-    
+
     public void setTuples(List<Tuple> tuples) {
 	this.tuples = tuples;
     }
 
-    public void deleteTuples(WhereClause whereClause) {
-	if (whereClause == null)
+    public int deleteTuples(WhereClause whereClause) {
+	updateTables = new ArrayList<String>();
+
+	if (whereClause == null) {
+	    int count = tuples.size();
 	    tuples.clear();
-	else {
-	    for (Tuple tuple : tuples) {
-		if (whereClause.compute(tuple))
-		    tuples.remove(tuple);
+
+	    List<ForeignKey> referencingForeignKeys = getReferencingForeignKey();
+	    for (ForeignKey referencingForeignKey : referencingForeignKeys) {
+		List<Column> foreignKeyColumns = referencingForeignKey.getForeignKeyColumns();
+
+		boolean allCanHaveNullValue = true;
+		for (Column foreignKeyColumn : foreignKeyColumns) {
+		    if (!foreignKeyColumn.canHaveNullValue())
+			allCanHaveNullValue = false;
+		}
+
+		if (allCanHaveNullValue) {
+		    Table keyingTable = RecordManager.getInstance().getTableDictionary()
+			    .get(referencingForeignKey.getForeignKeyingTable().getTableName());
+		    updateTables.add(keyingTable.getTableName());
+
+		    for (Tuple tuple : keyingTable.getTuples()) {
+			int index = 0;
+			for (ColumnValue columnValue : tuple.getColumnValues()) {
+			    for (Column foreignKeyColumn : foreignKeyColumns) {
+				if (foreignKeyColumn.getColumnName().equals(columnValue.getColumnName())) {
+				    index = tuple.getColumnValues().indexOf(columnValue);
+				}
+			    }
+			}
+			tuple.getColumnValues().set(index, null);
+		    }
+		} else {
+		    Message.getInstance().addSchemaError(
+			    new Message.Unit(Message.DELETE_REFERENTIAL_INTEGRITY_PASSED, String.valueOf(count)));
+		    return -1;
+		}
 	    }
+	    return count;
+	} else {
+	    int count = 0;
+	    List<Tuple> removeTuples = new ArrayList<Tuple>();
+	    
+	    for (Tuple tuple : tuples) {
+		if (whereClause.compute(tuple)) {
+		    removeTuples.add(tuple);
+		    count++;
+		}
+	    }
+	    for (Tuple tuple : removeTuples)
+		tuples.remove(tuple);
+
+	    return count;
 	}
     }
-    
+
     public Table cartesianProduct(Table rightTable) {
 	if (rightTable == null)
 	    return this;
-	
+
 	Table table = new Table();
 	table.setTableName(tableName + " X " + rightTable.getTableName());
-	
+
 	List<Column> leftColumns = tableColumns;
 	List<Column> rightColumns = rightTable.getTableColumns();
-	
+
 	for (Column column : leftColumns) {
 	    table.addColumn(column);
 	}
 	for (Column column : rightColumns) {
 	    table.addColumn(column);
 	}
-	
+
 	List<Tuple> leftTuples = tuples;
 	List<Tuple> rightTuples = rightTable.getTuples();
 	List<Tuple> tuples = new ArrayList<Tuple>();
-	
+
 	for (Tuple leftTuple : leftTuples) {
 	    List<ColumnValue> leftValues = leftTuple.getColumnValues();
-	    
+
 	    for (Tuple rightTuple : rightTuples) {
 		List<ColumnValue> rightValues = rightTuple.getColumnValues();
 		Tuple tuple = new Tuple(table.getTableName());
@@ -304,12 +369,16 @@ public class Table implements Serializable {
 		    tuple.addColumnValue(columnValue);
 		for (ColumnValue columnValue : rightValues)
 		    tuple.addColumnValue(columnValue);
-		
+
 		tuples.add(tuple);
 	    }
 	}
-	
+
 	table.setTuples(tuples);
 	return table;
+    }
+
+    public List<String> getUpdateTables() {
+	return updateTables;
     }
 }

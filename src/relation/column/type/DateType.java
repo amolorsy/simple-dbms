@@ -1,6 +1,8 @@
 package relation.column.type;
 
-public class DateType extends ColumnType {
+import java.io.Serializable;
+
+public class DateType extends ColumnType implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Override

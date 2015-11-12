@@ -1,7 +1,8 @@
-package util;
+package relation.column;
 
 public class SelectColumn {
     private String tableName;
+    private String tableNickName;
     private String columnName;
     private String nickName;
     
@@ -11,6 +12,14 @@ public class SelectColumn {
     
     public String getTableName() {
 	return tableName;
+    }
+    
+    public void setTableNickName(String tableNickName) {
+	this.tableNickName = tableNickName;
+    }
+    
+    public String getTableNickName() {
+	return tableNickName;
     }
     
     public void setColumnName(String columnName) {

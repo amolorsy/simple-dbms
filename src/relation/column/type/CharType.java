@@ -1,6 +1,8 @@
 package relation.column.type;
 
-public class CharType extends ColumnType {
+import java.io.Serializable;
+
+public class CharType extends ColumnType implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int size;

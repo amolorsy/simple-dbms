@@ -1,6 +1,8 @@
 package relation.column.value;
 
-public class IntValue extends ColumnValue {
+import java.io.Serializable;
+
+public class IntValue extends ColumnValue implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private Integer value;

@@ -163,6 +163,9 @@ public class Message {
 	case INSERT_REFERENTIAL_INTEGRITY_ERROR:
 	    System.out.println("Insertion has failed: Referential integrity violation");
 	    break;
+	case INSERT_COLUMN_VALUE_CORRESPONDENCE_ERROR:
+	    System.out.println("Insertion has failed: the value can't be corresponded to table column");
+	    break;
 	case DELETE_REFERENTIAL_INTEGRITY_PASSED:
 	    System.out.println(word + " row(s) are not deleted due to referential integrity");
 	    break;

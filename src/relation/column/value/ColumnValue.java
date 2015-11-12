@@ -1,11 +1,14 @@
 package relation.column.value;
 
 import java.io.Serializable;
+import java.util.List;
 
 import predicate.CompOperand;
+import relation.Tuple;
 import relation.column.type.ColumnType;
+import util.Message;
 
-public abstract class ColumnValue extends CompOperand implements Serializable {
+public class ColumnValue extends CompOperand implements Serializable {
     private static final long serialVersionUID = 1L;
     
     protected String tableName;
@@ -17,7 +20,7 @@ public abstract class ColumnValue extends CompOperand implements Serializable {
     }
 
     public String getTableName() {
-	return tableName;
+	return this.tableName;
     }
     
     public void setColumnName(String columnName) {
@@ -25,7 +28,7 @@ public abstract class ColumnValue extends CompOperand implements Serializable {
     }
 
     public String getColumnName() {
-	return columnName;
+	return this.columnName;
     }
 
     public void setColumnType(ColumnType columnType) {
@@ -33,6 +36,21 @@ public abstract class ColumnValue extends CompOperand implements Serializable {
     }
 
     public ColumnType getColumnType() {
-	return columnType;
+	return this.columnType;
+    }
+
+    public ColumnValue getColumnValue(Tuple tuple) {
+	if (columnName == null)
+	    return this;
+	
+	List<ColumnValue> columnValues = tuple.getColumnValues();
+	for (ColumnValue columnValue : columnValues) {
+	    if (columnName.equals(columnValue.getColumnName()))
+		return columnValue;
+	}
+	
+	// When the column doesn't exist
+	Message.getInstance().addSchemaError(new Message.Unit(Message.WHERE_COLUMN_NOT_EXIST, null));
+	return null;
     }
 }
